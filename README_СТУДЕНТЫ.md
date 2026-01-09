@@ -155,16 +155,35 @@ Backend запустится на http://localhost:8080
 **Вариант Б - Tomcat:**
 
 ```bash
-# Скопируйте WAR в Tomcat
-cp target/my-blog-back-app.war $TOMCAT_HOME/webapps/ROOT.war
+# 1. Скопируйте WAR файл в директорию webapps вашего Tomcat
+#    Замените /path/to/tomcat на реальный путь к Tomcat
+cp target/my-blog-back-app.war /path/to/tomcat/webapps/ROOT.war
 
-# Перезапустите Tomcat
-brew services restart tomcat  # для macOS с Homebrew
-# или
-$TOMCAT_HOME/bin/shutdown.sh && $TOMCAT_HOME/bin/startup.sh
+# 2. Запустите/перезапустите Tomcat через скрипты в папке bin:
+
+# Остановка (если запущен):
+/path/to/tomcat/bin/shutdown.sh
+
+# Запуск:
+/path/to/tomcat/bin/startup.sh
+
+# Или для macOS с Homebrew:
+brew services restart tomcat
 ```
 
+**Примеры путей к Tomcat:**
+- macOS (Homebrew): `/opt/homebrew/opt/tomcat/libexec/`
+- Linux: `/opt/tomcat/` или `/usr/local/tomcat/`
+- Windows: `C:\Program Files\Apache Tomcat\`
+
 ### 4. Запуск frontend (опционально)
+
+⚠️ **Требуется Node.js 18+ и npm**
+
+Если у вас не установлен Node.js:
+- **macOS**: `brew install node`
+- **Windows**: Скачайте с https://nodejs.org
+- **Linux**: `sudo apt install nodejs npm` или `sudo yum install nodejs npm`
 
 ```bash
 cd frontend
@@ -173,6 +192,8 @@ npm run dev
 ```
 
 Frontend запустится на http://localhost:3000
+
+> **Примечание:** Frontend не обязателен для тестирования backend. Вы можете использовать curl или Postman.
 
 ### 5. Проверка
 

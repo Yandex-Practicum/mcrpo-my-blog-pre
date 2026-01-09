@@ -109,12 +109,16 @@ mvn jetty:run -Dmaven.test.skip=true
 
 # Backend запустится на http://localhost:8080
 
-# 4. Запустить frontend (в другом терминале)
+# 4. Запустить frontend (в другом терминале, опционально)
+# ⚠️ Требуется Node.js 18+ и npm
+# Установка: brew install node (macOS) или https://nodejs.org
+
 cd frontend
 npm install
 npm run dev
 
 # Frontend запустится на http://localhost:3000
+# Или тестируйте backend через curl/Postman
 ```
 
 ---
