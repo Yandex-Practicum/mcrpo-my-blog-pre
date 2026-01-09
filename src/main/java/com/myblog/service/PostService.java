@@ -14,6 +14,7 @@ public interface PostService {
     Post updatePost(Long id, UpdatePostRequest request);
     void deletePost(Long id);
     int incrementLikes(Long id);
+    int decrementLikes(Long id);
     void saveImage(Long postId, byte[] imageData, String contentType);
     Optional<byte[]> getImage(Long postId);
     Optional<String> getImageContentType(Long postId);

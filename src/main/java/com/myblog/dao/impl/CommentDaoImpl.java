@@ -64,15 +64,19 @@ public class CommentDaoImpl implements CommentDao {
 
     @Override
     public Comment update(Comment comment) {
-        String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        jdbcTemplate.update(sql, comment.getText(), comment.getId());
-        return findById(comment.getId()).orElse(comment);
+        // TODO: Реализовать обновление комментария
+        // 1. Выполнить SQL UPDATE: UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+        // 2. Вернуть обновлённый комментарий через findById(comment.getId())
+        // Пример: String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        throw new UnsupportedOperationException("TODO: Implement update");
     }
 
     @Override
     public void delete(Long id) {
-        String sql = "DELETE FROM comments WHERE id = ?";
-        jdbcTemplate.update(sql, id);
+        // TODO: Реализовать удаление комментария
+        // Выполнить SQL DELETE: DELETE FROM comments WHERE id = ?
+        // Пример: String sql = "DELETE FROM comments WHERE id = ?";
+        throw new UnsupportedOperationException("TODO: Implement delete");
     }
 
     @Override

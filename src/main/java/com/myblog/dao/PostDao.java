@@ -12,6 +12,7 @@ public interface PostDao {
     Post update(Post post);
     void delete(Long id);
     void incrementLikes(Long id);
+    void decrementLikes(Long id);
     int getTotalCount(String search);
     void saveImage(Long postId, byte[] imageData, String contentType);
     Optional<byte[]> getImage(Long postId);
