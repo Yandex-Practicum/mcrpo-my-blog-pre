@@ -35,7 +35,7 @@ public class CommentController {
     public ResponseEntity<Comment> getComment(
             @PathVariable Long postId,
             @PathVariable Long commentId) {
-        
+
         log.debug("GET /api/posts/{}/comments/{}", postId, commentId);
         Optional<Comment> comment = commentService.getCommentById(commentId);
         return comment.map(ResponseEntity::ok)
@@ -46,8 +46,10 @@ public class CommentController {
     public ResponseEntity<Comment> createComment(
             @PathVariable Long postId,
             @RequestBody CreateCommentRequest request) {
-        
+
         log.debug("POST /api/posts/{}/comments - text: {}", postId, request.getText());
+        // важно: в request должен быть postId; если его нет — установи здесь:
+        request.setPostId(postId);
         Comment createdComment = commentService.createComment(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
@@ -57,24 +59,23 @@ public class CommentController {
             @PathVariable Long postId,
             @PathVariable Long commentId,
             @RequestBody UpdateCommentRequest request) {
-        
-        // TODO: Реализовать обновление комментария
-        // 1. Вызвать commentService.updateComment(commentId, request)
-        // 2. Обработать исключение IllegalArgumentException -> вернуть 404
-        // 3. При успехе вернуть ResponseEntity.ok(updatedComment)
-        // Подсказка: посмотрите на PostController.updatePost как пример
-        throw new UnsupportedOperationException("TODO: Implement updateComment");
+
+        log.debug("PUT /api/posts/{}/comments/{} - text: {}", postId, commentId, request.getText());
+        try {
+            Comment updatedComment = commentService.updateComment(commentId, request);
+            return ResponseEntity.ok(updatedComment);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long postId,
             @PathVariable Long commentId) {
-        
-        // TODO: Реализовать удаление комментария
-        // 1. Вызвать commentService.deleteComment(commentId)
-        // 2. Вернуть ResponseEntity.ok().build()
-        throw new UnsupportedOperationException("TODO: Implement deleteComment");
+
+        log.debug("DELETE /api/posts/{}/comments/{}", postId, commentId);
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok().build();
     }
 }
-

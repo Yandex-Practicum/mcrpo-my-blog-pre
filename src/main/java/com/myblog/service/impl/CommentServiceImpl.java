@@ -52,22 +52,30 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public Comment updateComment(Long commentId, UpdateCommentRequest request) {
-        // TODO: Реализовать обновление комментария
-        // 1. Проверить существование комментария через commentDao.findById(commentId)
-        // 2. Если комментарий не найден - выбросить IllegalArgumentException
-        // 3. Обновить текст комментария: comment.setText(request.getText())
-        // 4. Вызвать commentDao.update(comment)
-        // 5. Вернуть обновлённый комментарий
-        throw new UnsupportedOperationException("TODO: Implement updateComment");
+         log.debug("Updating comment with id: {}", commentId);
+
+        // 1. Проверяем существование комментария
+        Optional<Comment> existing = commentDao.findById(commentId);
+        if (existing.isEmpty()) {
+            throw new IllegalArgumentException("Comment not found with id: " + commentId);
+        }
+
+        // 2. Обновляем текст
+        Comment comment = existing.get();
+        comment.setText(request.getText());
+
+        // 3. Сохраняем изменения через DAO
+        return commentDao.update(comment);
     }
 
     @Override
     @Transactional
     public void deleteComment(Long commentId) {
-        // TODO: Реализовать удаление комментария
         // 1. Вызвать commentDao.delete(commentId)
         // Подсказка: посмотрите на метод createComment как пример
-        throw new UnsupportedOperationException("TODO: Implement deleteComment");
+        log.debug("Deleting comment with id: {}", commentId);
+
+        commentDao.delete(commentId);
     }
 }
 
