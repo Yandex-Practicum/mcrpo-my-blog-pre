@@ -82,8 +82,19 @@ public class PostController {
         // 1. Вызвать postService.deletePost(id)
         // 2. Вернуть ResponseEntity.ok().build()
         // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+
+        //throw new UnsupportedOperationException("TODO: Implement deletePost");
+
+        log.debug("DELETE /api/posts/{}", id);
+
+        try {
+            postService.deletePost(id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
+
 
     @PostMapping("/{id}/likes")
     public ResponseEntity<Integer> incrementLikes(@PathVariable Long id) {
@@ -97,7 +108,16 @@ public class PostController {
         // TODO: Реализовать удаление лайка
         // 1. Вызвать postService.decrementLikes(id)
         // 2. Вернуть ResponseEntity.ok() с новым количеством лайков
-        throw new UnsupportedOperationException("TODO: Implement removeLike");
+        //throw new UnsupportedOperationException("TODO: Implement removeLike");
+
+        log.debug("DELETE /api/posts/{}/likes", id);
+
+        try {
+            int likesCount = postService.decrementLikes(id);
+            return ResponseEntity.ok(likesCount);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{id}/image")

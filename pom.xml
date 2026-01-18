@@ -73,13 +73,13 @@
             <version>${h2.version}</version>
         </dependency>
 
-        <!-- Lombok - commented out due to compatibility issues
+        <!-- Lombok - commented out due to compatibility issues -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
         </dependency>
-        -->
+
 
         <!-- Logging -->
         <dependency>

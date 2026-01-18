@@ -1,0 +1,36 @@
+-------------------------------------------------------------------------------
+Test set: com.myblog.service.CommentServiceTest
+-------------------------------------------------------------------------------
+Tests run: 6, Failures: 1, Errors: 2, Skipped: 0, Time elapsed: 0.978 s <<< FAILURE! -- in com.myblog.service.CommentServiceTest
+com.myblog.service.CommentServiceTest.testDeleteComment -- Time elapsed: 0.895 s <<< ERROR!
+java.lang.UnsupportedOperationException: TODO: Implement deleteComment
+	at com.myblog.service.impl.CommentServiceImpl.deleteComment(CommentServiceImpl.java:70)
+	at com.myblog.service.CommentServiceTest.testDeleteComment(CommentServiceTest.java:136)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
+com.myblog.service.CommentServiceTest.testUpdateCommentNotFound -- Time elapsed: 0.006 s <<< FAILURE!
+org.opentest4j.AssertionFailedError: Unexpected exception type thrown, expected: <java.lang.IllegalArgumentException> but was: <java.lang.UnsupportedOperationException>
+	at org.junit.jupiter.api.AssertionFailureBuilder.build(AssertionFailureBuilder.java:151)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:67)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:35)
+	at org.junit.jupiter.api.Assertions.assertThrows(Assertions.java:3115)
+	at com.myblog.service.CommentServiceTest.testUpdateCommentNotFound(CommentServiceTest.java:125)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+Caused by: java.lang.UnsupportedOperationException: TODO: Implement updateComment
+	at com.myblog.service.impl.CommentServiceImpl.updateComment(CommentServiceImpl.java:61)
+	at com.myblog.service.CommentServiceTest.lambda$testUpdateCommentNotFound$0(CommentServiceTest.java:126)
+	at org.junit.jupiter.api.AssertThrows.assertThrows(AssertThrows.java:53)
+	... 6 more
+
+com.myblog.service.CommentServiceTest.testUpdateComment -- Time elapsed: 0.004 s <<< ERROR!
+java.lang.UnsupportedOperationException: TODO: Implement updateComment
+	at com.myblog.service.impl.CommentServiceImpl.updateComment(CommentServiceImpl.java:61)
+	at com.myblog.service.CommentServiceTest.testUpdateComment(CommentServiceTest.java:105)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1596)
+
