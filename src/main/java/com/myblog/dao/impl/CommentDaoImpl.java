@@ -66,17 +66,28 @@ public class CommentDaoImpl implements CommentDao {
     public Comment update(Comment comment) {
         // TODO: Реализовать обновление комментария
         // 1. Выполнить SQL UPDATE: UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
+        String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        int updated = jdbcTemplate.update(sql, comment.getText(), comment.getId());
         // 2. Вернуть обновлённый комментарий через findById(comment.getId())
+        if (updated == 0) {
+            throw new IllegalArgumentException("Comment not found with id: " + comment.getId());
+        }
+        return findById(comment.getId()).orElse(comment);
         // Пример: String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        throw new UnsupportedOperationException("TODO: Implement update");
+
     }
 
     @Override
     public void delete(Long id) {
         // TODO: Реализовать удаление комментария
         // Выполнить SQL DELETE: DELETE FROM comments WHERE id = ?
+        String sql = "DELETE FROM comments WHERE id = ?";
+        int deleted = jdbcTemplate.update(sql, id);
         // Пример: String sql = "DELETE FROM comments WHERE id = ?";
-        throw new UnsupportedOperationException("TODO: Implement delete");
+        if (deleted == 0) {
+            throw new IllegalArgumentException("Comment not found with id: " + id);
+        }
+
     }
 
     @Override
