@@ -58,7 +58,17 @@ public class CommentServiceImpl implements CommentService {
         // 3. Обновить текст комментария: comment.setText(request.getText())
         // 4. Вызвать commentDao.update(comment)
         // 5. Вернуть обновлённый комментарий
-        throw new UnsupportedOperationException("TODO: Implement updateComment");
+        log.debug("Updating comment with id: {}", commentId);
+
+        Optional<Comment> existingComment = commentDao.findById(commentId);
+        if (existingComment.isEmpty()) {
+            throw new IllegalArgumentException("Comment not found with id: " + commentId);
+        }
+
+        Comment comment = existingComment.get();
+        comment.setText(request.getText());
+
+        return commentDao.update(comment);
     }
 
     @Override
@@ -67,7 +77,8 @@ public class CommentServiceImpl implements CommentService {
         // TODO: Реализовать удаление комментария
         // 1. Вызвать commentDao.delete(commentId)
         // Подсказка: посмотрите на метод createComment как пример
-        throw new UnsupportedOperationException("TODO: Implement deleteComment");
+        log.debug("Deleting comment with id: {}", commentId);
+        commentDao.delete(commentId);
     }
 }
 
