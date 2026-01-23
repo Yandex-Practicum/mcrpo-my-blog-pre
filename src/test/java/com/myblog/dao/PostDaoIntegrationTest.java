@@ -213,5 +213,46 @@ class PostDaoIntegrationTest {
         // Then
         assertEquals(3, count);
     }
+
+    //Тест метода decrementLikes() класса PostDaoImpl на успешное удаление лайков
+    @Test
+    void testDecrementLikes() {
+        // Given
+        Post post = new Post();
+        post.setTitle("Test Post");
+        post.setText("Test content");
+        post.setTags(Arrays.asList());
+//        post.setLikesCount(2);
+        Post createdPost = postDao.create(post);// likesCount = 0
+        postDao.incrementLikes(createdPost.getId());
+        postDao.incrementLikes(createdPost.getId());
+
+        // When
+        postDao.decrementLikes(createdPost.getId());
+
+        // Then
+        Optional<Post> updatedPost = postDao.findById(createdPost.getId());
+        assertTrue(updatedPost.isPresent());
+        assertEquals(1, updatedPost.get().getLikesCount());
+    }
+
+    //Тест метода decrementLikes() класса PostDaoImpl на неотрицательное количество лайков
+    @Test
+    void testDecrementLikesNonNegative() {
+        // Given
+        Post post = new Post();
+        post.setTitle("Test Post");
+        post.setText("Test content");
+        post.setTags(Arrays.asList());
+        Post createdPost = postDao.create(post);
+
+        // When
+        postDao.decrementLikes(createdPost.getId());
+
+        // Then
+        Optional<Post> updatedPost = postDao.findById(createdPost.getId());
+        assertTrue(updatedPost.isPresent());
+        assertEquals(0, updatedPost.get().getLikesCount());
+    }
 }
 

@@ -78,11 +78,10 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postService.deletePost(id)
-        // 2. Вернуть ResponseEntity.ok().build()
-        // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+        log.debug("DELETE /api/posts/{}", id);
+        //Вызов postService.deletePost()
+        postService.deletePost(id);
+        return ResponseEntity.ok().build(); //возврат статус 200 OK
     }
 
     @PostMapping("/{id}/likes")
@@ -94,10 +93,11 @@ public class PostController {
 
     @DeleteMapping("/{id}/likes")
     public ResponseEntity<Integer> removeLike(@PathVariable Long id) {
-        // TODO: Реализовать удаление лайка
-        // 1. Вызвать postService.decrementLikes(id)
-        // 2. Вернуть ResponseEntity.ok() с новым количеством лайков
-        throw new UnsupportedOperationException("TODO: Implement removeLike");
+        log.debug("DELETE /api/posts/{}/likes", id);
+        //Вызов postService.decrementLikes(id)
+        int likesCount = postService.decrementLikes(id);
+        //Возврат нового количества лайков
+        return ResponseEntity.ok(likesCount);
     }
 
     @PutMapping("/{id}/image")

@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -142,14 +143,19 @@ public class PostDaoImpl implements PostDao {
 
     @Override
     public void delete(Long id) {
-        // TODO: Реализовать каскадное удаление поста
-        // Порядок удаления:
-        // 1. Удалить все комментарии: DELETE FROM comments WHERE post_id = ?
-        // 2. Удалить все связи с тегами: DELETE FROM post_tags WHERE post_id = ?
-        // 3. Удалить изображение: DELETE FROM post_images WHERE post_id = ?
-        // 4. Удалить сам пост: DELETE FROM posts WHERE id = ?
-        // ВАЖНО: Используйте @Transactional в сервисе для атомарности операции!
-        throw new UnsupportedOperationException("TODO: Implement cascade delete");
+        String deleteCommentsSql = "DELETE FROM comments WHERE post_id = ?";
+        String deleteTagsSql = "DELETE FROM post_tags WHERE post_id = ?";
+        String deleteImagesSql = "DELETE FROM post_images WHERE post_id = ?";
+        String deletePostSql = "DELETE FROM posts WHERE id = ?";
+
+        //Удаление всех комментов
+        jdbcTemplate.update(deleteCommentsSql, id);
+        //Удаление всех связей с тегами
+        jdbcTemplate.update(deleteTagsSql, id);
+        //Удаление изображений
+        jdbcTemplate.update(deleteImagesSql, id);
+        //Удаление самого поста
+        jdbcTemplate.update(deletePostSql, id);
     }
 
     @Override
@@ -160,10 +166,8 @@ public class PostDaoImpl implements PostDao {
 
     @Override
     public void decrementLikes(Long id) {
-        // TODO: Реализовать уменьшение счётчика лайков на 1
-        // Используйте GREATEST(likes_count - 1, 0) чтобы не уйти в минус
-        // Пример SQL: UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?
-        throw new UnsupportedOperationException("TODO: Implement decrementLikes");
+        String sql = "UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     @Override
