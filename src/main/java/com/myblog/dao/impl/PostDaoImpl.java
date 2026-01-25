@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -141,6 +142,7 @@ public class PostDaoImpl implements PostDao {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
         // TODO: Реализовать каскадное удаление поста
         // Порядок удаления:
@@ -149,6 +151,7 @@ public class PostDaoImpl implements PostDao {
         // 3. Удалить изображение: DELETE FROM post_images WHERE post_id = ?
         // 4. Удалить сам пост: DELETE FROM posts WHERE id = ?
         // ВАЖНО: Используйте @Transactional в сервисе для атомарности операции!
+
         jdbcTemplate.update("DELETE FROM comments WHERE post_id = ?", id);
         jdbcTemplate.update("DELETE FROM post_tags WHERE post_id = ?", id);
         jdbcTemplate.update("DELETE FROM post_images WHERE post_id = ?", id);
