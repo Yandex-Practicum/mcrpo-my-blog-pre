@@ -71,6 +71,22 @@ public class CommentServiceImpl implements CommentService {
         return commentDao.update(comment);
     }
 
+    // Вспомогательный метод для валидации текста комментария
+    private void validateCommentText(String text) {
+        if (text == null) {
+            throw new IllegalArgumentException("Текст комментария не может быть null");
+        }
+
+        String trimmedText = text.trim();
+        if (trimmedText.isEmpty()) {
+            throw new IllegalArgumentException("Текст комментария не может быть пустым");
+        }
+
+        if (trimmedText.length() > 1000) { // Максимальная длина комментария
+            throw new IllegalArgumentException("Текст комментария не может превышать 1000 символов");
+        }
+    }
+
     @Override
     @Transactional
     public void deleteComment(Long commentId) {
