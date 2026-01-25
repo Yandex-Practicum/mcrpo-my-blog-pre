@@ -63,13 +63,36 @@ public class CommentController {
         // 2. Обработать исключение IllegalArgumentException -> вернуть 404
         // 3. При успехе вернуть ResponseEntity.ok(updatedComment)
         // Подсказка: посмотрите на PostController.updatePost как пример
+
+        // 1. Валидация request
+        if (request == null) {
+            log.warn("PUT /api/posts/{}/comments/{} - request is null", postId, commentId);
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        // 2. Ручная валидация text
+        if (request.getText() == null || request.getText().trim().isEmpty()) {
+            log.warn("PUT /api/posts/{}/comments/{} - text is null or empty", postId, commentId);
+            return ResponseEntity.badRequest().body(null);
+        }
+
+        if (request.getText().length() > 1000) {
+            log.warn("PUT /api/posts/{}/comments/{} - text too long: {}", postId, commentId, request.getText().length());
+            return ResponseEntity.badRequest().body(null);
+        }
+
         log.debug("PUT /api/posts/{}/comments/{} - text: {}", postId, commentId, request.getText());
 
+        // 3. Обработка через try-catch
         try {
             Comment updatedComment = commentService.updateComment(commentId, request);
             return ResponseEntity.ok(updatedComment);
         } catch (IllegalArgumentException e) {
+            log.error("Comment not found: {}", commentId, e);
             return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error updating comment {}: {}", commentId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
@@ -82,8 +105,17 @@ public class CommentController {
         // 1. Вызвать commentService.deleteComment(commentId)
         // 2. Вернуть ResponseEntity.ok().build()
         log.debug("DELETE /api/posts/{}/comments/{}", postId, commentId);
-        commentService.deleteComment(commentId);
-        return ResponseEntity.ok().build();
+
+        try {
+            commentService.deleteComment(commentId);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            log.warn("Comment not found for deletion: postId={}, commentId={}", postId, commentId);
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error deleting comment {}: {}", commentId, e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
     }
 }
 
