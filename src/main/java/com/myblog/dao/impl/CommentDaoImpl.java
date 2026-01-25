@@ -70,7 +70,8 @@ public class CommentDaoImpl implements CommentDao {
         // Пример: String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         jdbcTemplate.update(sql, comment.getText(), comment.getId());
-        return findById(comment.getId()).orElse(comment);
+        return findById(comment.getId())
+                .orElseThrow(() -> new IllegalStateException("Комментарий не найден после обновления: id=" + comment.getId()));
     }
 
     @Override
