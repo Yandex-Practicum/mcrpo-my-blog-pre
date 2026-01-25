@@ -106,7 +106,8 @@ public class PostServiceImpl implements PostService {
         postDao.decrementLikes(id);
 
         Optional<Post> post = postDao.findById(id);
-        return post.map(Post::getLikesCount).orElse(0);
+        return post.map(Post::getLikesCount)
+                .orElseThrow(() -> new IllegalStateException("Пост не найден после уменьшения лайков: id=" + id));
     }
 
     @Override
