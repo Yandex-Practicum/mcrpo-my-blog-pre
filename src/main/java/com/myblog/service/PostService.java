@@ -13,6 +13,8 @@ public interface PostService {
     Post createPost(CreatePostRequest request);
     Post updatePost(Long id, UpdatePostRequest request);
     void deletePost(Long id);
+    void addLike(Long id);
+    void removeLike(Long id);
     int incrementLikes(Long id);
     int decrementLikes(Long id);
     void saveImage(Long postId, byte[] imageData, String contentType);
