@@ -58,7 +58,16 @@ public class CommentServiceImpl implements CommentService {
         // 3. Обновить текст комментария: comment.setText(request.getText())
         // 4. Вызвать commentDao.update(comment)
         // 5. Вернуть обновлённый комментарий
-        throw new UnsupportedOperationException("TODO: Implement updateComment");
+            Optional<Comment> commentOptional = commentDao.findById(commentId);
+            if (commentOptional.isPresent()){
+                Comment comment = commentOptional.get();
+                comment.setText(request.getText());
+                comment = commentDao.update(comment);
+                return comment;
+            }
+            else {
+                throw new IllegalArgumentException("Комментарий не найден");
+            }
     }
 
     @Override
@@ -67,7 +76,7 @@ public class CommentServiceImpl implements CommentService {
         // TODO: Реализовать удаление комментария
         // 1. Вызвать commentDao.delete(commentId)
         // Подсказка: посмотрите на метод createComment как пример
-        throw new UnsupportedOperationException("TODO: Implement deleteComment");
+       commentDao.delete(commentId);
     }
 }
 

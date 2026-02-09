@@ -63,7 +63,12 @@ public class CommentController {
         // 2. Обработать исключение IllegalArgumentException -> вернуть 404
         // 3. При успехе вернуть ResponseEntity.ok(updatedComment)
         // Подсказка: посмотрите на PostController.updatePost как пример
-        throw new UnsupportedOperationException("TODO: Implement updateComment");
+        try {
+            Comment comment = commentService.updateComment(commentId,request);
+            return ResponseEntity.ok(comment);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{commentId}")
@@ -74,7 +79,8 @@ public class CommentController {
         // TODO: Реализовать удаление комментария
         // 1. Вызвать commentService.deleteComment(commentId)
         // 2. Вернуть ResponseEntity.ok().build()
-        throw new UnsupportedOperationException("TODO: Implement deleteComment");
+        commentService.deleteComment(commentId);
+        return   ResponseEntity.ok().build();
     }
 }
 

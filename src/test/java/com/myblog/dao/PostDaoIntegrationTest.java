@@ -213,5 +213,39 @@ class PostDaoIntegrationTest {
         // Then
         assertEquals(3, count);
     }
+
+    @Test
+    void testDecrementLikes() {
+
+        Post post = new Post();
+        post.setTitle("Test");
+        post.setText("Content");
+        post.setTags(Arrays.asList());
+        Post createdPost = postDao.create(post);
+
+        postDao.incrementLikes(createdPost.getId());
+        postDao.incrementLikes(createdPost.getId());
+
+        postDao.decrementLikes(createdPost.getId());
+
+        Optional<Post> updatedPost = postDao.findById(createdPost.getId());
+        assertTrue(updatedPost.isPresent());
+        assertEquals(1, updatedPost.get().getLikesCount());
+    }
+
+    @Test
+    void testDelete() {
+
+        Post post = new Post();
+        post.setTitle("Test");
+        post.setText("Content");
+        post.setTags(Arrays.asList());
+        Post createdPost = postDao.create(post);
+
+        postDao.delete(createdPost.getId());
+
+        Optional<Post> deletedPost = postDao.findById(createdPost.getId());
+        assertFalse(deletedPost.isPresent());
+    }
 }
 
