@@ -173,5 +173,24 @@ class PostServiceTest {
         verify(postDao).incrementLikes(1L);
         verify(postDao).findById(1L);
     }
+
+    @Test
+    void testDecrementLikes() {
+        Post likedPost = new Post();
+        likedPost.setId(1L);
+        likedPost.setTitle("Test Post");
+        likedPost.setText("Test content");
+        likedPost.setLikesCount(3);
+        likedPost.setCommentsCount(0);
+        
+        when(postDao.findById(1L)).thenReturn(Optional.of(likedPost));
+
+        int likesCount = postService.decrementLikes(1L);
+
+        assertEquals(3, likesCount);
+        
+        verify(postDao).decrementLikes(1L);
+        verify(postDao).findById(1L);
+    }
 }
 
