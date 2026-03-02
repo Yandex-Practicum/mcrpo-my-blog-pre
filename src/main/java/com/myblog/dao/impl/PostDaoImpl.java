@@ -147,7 +147,6 @@ public class PostDaoImpl implements PostDao {
         jdbcTemplate.update("DELETE FROM post_tags WHERE post_id = ?", id);
         jdbcTemplate.update("DELETE FROM post_images WHERE post_id = ?", id);
         jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
-        throw new UnsupportedOperationException("TODO: Implement cascade delete");
     }
 
     @Override
