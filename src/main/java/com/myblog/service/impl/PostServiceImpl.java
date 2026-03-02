@@ -95,7 +95,7 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public int decrementLikes(Long id) {
         log.debug("Decrementing likes for post with id: {}", id);
-        postDao.incrementLikes(id);
+        postDao.decrementLikes(id);
 
         Post post = postDao.findById(id).orElseThrow(() -> new IllegalArgumentException("Post with id " + id + " not found"));
         return post.getLikesCount();
