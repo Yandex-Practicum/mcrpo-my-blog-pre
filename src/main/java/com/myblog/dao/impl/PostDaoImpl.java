@@ -150,6 +150,10 @@ public class PostDaoImpl implements PostDao {
         // 4. Удалить сам пост: DELETE FROM posts WHERE id = ?
         // ВАЖНО: Используйте @Transactional в сервисе для атомарности операции!
         throw new UnsupportedOperationException("TODO: Implement cascade delete");
+        jdbcTemplate.update("DELETE FROM comments WHERE post_id = ?", id);
+        jdbcTemplate.update("DELETE FROM post_tags WHERE post_id = ?", id);
+        jdbcTemplate.update("DELETE FROM post_images WHERE post_id = ?", id);
+        jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
     }
 
     @Override
@@ -164,6 +168,8 @@ public class PostDaoImpl implements PostDao {
         // Используйте GREATEST(likes_count - 1, 0) чтобы не уйти в минус
         // Пример SQL: UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?
         throw new UnsupportedOperationException("TODO: Implement decrementLikes");
+        String sql = "UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     @Override

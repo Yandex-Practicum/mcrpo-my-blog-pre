@@ -4,6 +4,7 @@ import com.myblog.dto.CreateCommentRequest;
 import com.myblog.dto.UpdateCommentRequest;
 import com.myblog.model.Comment;
 import com.myblog.service.CommentService;
+import com.myblog.model.Post;	
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -64,6 +65,14 @@ public class CommentController {
         // 3. При успехе вернуть ResponseEntity.ok(updatedComment)
         // Подсказка: посмотрите на PostController.updatePost как пример
         throw new UnsupportedOperationException("TODO: Implement updateComment");
+        log.debug("PUT /api/posts/{}/comments/{}", postId, commentId);
+        //Вызов commentService.updateComment(commentId, request)
+        try {
+            Comment updatedComment = commentService.updateComment(commentId, request);
+            return ResponseEntity.ok(updatedComment);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{commentId}")
@@ -75,6 +84,9 @@ public class CommentController {
         // 1. Вызвать commentService.deleteComment(commentId)
         // 2. Вернуть ResponseEntity.ok().build()
         throw new UnsupportedOperationException("TODO: Implement deleteComment");
+        log.debug("DELETE /api/posts/{}/comments/{}", postId, commentId);
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok().build();
     }
 }
 
