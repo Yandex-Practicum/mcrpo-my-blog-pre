@@ -1,18 +1,19 @@
 package com.myblog.service.impl;
 
+import java.util.List;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.myblog.dao.PostDao;
 import com.myblog.dto.CreatePostRequest;
 import com.myblog.dto.PostListResponse;
 import com.myblog.dto.UpdatePostRequest;
 import com.myblog.model.Post;
 import com.myblog.service.PostService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class PostServiceImpl implements PostService {
@@ -77,11 +78,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void deletePost(Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postDao.delete(id)
-        // ВАЖНО: Метод уже помечен @Transactional - это обеспечит атомарность каскадного удаления
-        // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+        postDao.delete(id);
     }
 
     @Override
@@ -90,18 +87,18 @@ public class PostServiceImpl implements PostService {
         log.debug("Incrementing likes for post with id: {}", id);
         postDao.incrementLikes(id);
         
-        Optional<Post> post = postDao.findById(id);
-        return post.map(Post::getLikesCount).orElse(0);
+        Post post = postDao.findById(id).orElseThrow(() -> new IllegalArgumentException("Post with id " + id + " not found"));
+        return post.getLikesCount();
     }
 
     @Override
     @Transactional
     public int decrementLikes(Long id) {
-        // TODO: Реализовать уменьшение лайков
-        // 1. Вызвать postDao.decrementLikes(id)
-        // 2. Получить обновлённый пост через postDao.findById(id)
-        // 3. Вернуть новое значение likesCount
-        throw new UnsupportedOperationException("TODO: Implement decrementLikes");
+        log.debug("Decrementing likes for post with id: {}", id);
+        postDao.incrementLikes(id);
+
+        Post post = postDao.findById(id).orElseThrow(() -> new IllegalArgumentException("Post with id " + id + " not found"));
+        return post.getLikesCount();
     }
 
     @Override
