@@ -1,7 +1,11 @@
 package com.myblog.dao.impl;
 
-import com.myblog.dao.CommentDao;
-import com.myblog.model.Comment;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,11 +14,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
+import com.myblog.dao.CommentDao;
+import com.myblog.model.Comment;
 
 @Repository
 public class CommentDaoImpl implements CommentDao {
@@ -64,19 +65,18 @@ public class CommentDaoImpl implements CommentDao {
 
     @Override
     public Comment update(Comment comment) {
-        // TODO: Реализовать обновление комментария
-        // 1. Выполнить SQL UPDATE: UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-        // 2. Вернуть обновлённый комментарий через findById(comment.getId())
-        // Пример: String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        throw new UnsupportedOperationException("TODO: Implement update");
+        String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        jdbcTemplate.update(sql, comment.getText(), comment.getId());        
+        return findById(comment.getId()).orElseThrow(() -> new IllegalArgumentException("Comment with id:" + comment.getId() + " not found"));
     }
 
     @Override
     public void delete(Long id) {
-        // TODO: Реализовать удаление комментария
-        // Выполнить SQL DELETE: DELETE FROM comments WHERE id = ?
-        // Пример: String sql = "DELETE FROM comments WHERE id = ?";
-        throw new UnsupportedOperationException("TODO: Implement delete");
+        String sql = "DELETE FROM comments WHERE id = ?";
+        int deletedId = jdbcTemplate.update(sql,id);
+        if(deletedId == 0){
+            throw new IllegalArgumentException("No comment with id " + id + " found");
+        }
     }
 
     @Override

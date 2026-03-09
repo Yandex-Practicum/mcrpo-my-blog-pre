@@ -1,17 +1,18 @@
 package com.myblog.service.impl;
 
-import com.myblog.dao.CommentDao;
-import com.myblog.dto.CreateCommentRequest;
-import com.myblog.dto.UpdateCommentRequest;
-import com.myblog.model.Comment;
-import com.myblog.service.CommentService;
+import java.util.List;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
+import com.myblog.dao.CommentDao;
+import com.myblog.dto.CreateCommentRequest;
+import com.myblog.dto.UpdateCommentRequest;
+import com.myblog.model.Comment;
+import com.myblog.service.CommentService;
 
 @Service
 public class CommentServiceImpl implements CommentService {
@@ -52,22 +53,15 @@ public class CommentServiceImpl implements CommentService {
     @Override
     @Transactional
     public Comment updateComment(Long commentId, UpdateCommentRequest request) {
-        // TODO: Реализовать обновление комментария
-        // 1. Проверить существование комментария через commentDao.findById(commentId)
-        // 2. Если комментарий не найден - выбросить IllegalArgumentException
-        // 3. Обновить текст комментария: comment.setText(request.getText())
-        // 4. Вызвать commentDao.update(comment)
-        // 5. Вернуть обновлённый комментарий
-        throw new UnsupportedOperationException("TODO: Implement updateComment");
+        Comment comment = commentDao.findById(commentId).orElseThrow(() -> new IllegalArgumentException("Comment with id " + commentId + " not found"));
+        comment.setText(request.getText());
+        return commentDao.update(comment);
     }
 
     @Override
     @Transactional
     public void deleteComment(Long commentId) {
-        // TODO: Реализовать удаление комментария
-        // 1. Вызвать commentDao.delete(commentId)
-        // Подсказка: посмотрите на метод createComment как пример
-        throw new UnsupportedOperationException("TODO: Implement deleteComment");
+        commentDao.delete(commentId);
     }
 }
 
