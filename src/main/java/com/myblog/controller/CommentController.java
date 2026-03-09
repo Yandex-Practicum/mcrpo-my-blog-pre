@@ -64,28 +64,19 @@ public class CommentController {
     public ResponseEntity<Comment> updateComment(
             @PathVariable Long postId,
             @PathVariable Long commentId,
-            @RequestBody UpdateCommentRequest request) {
-              
-        try {
-            Comment updatedComment = commentService.updateComment(commentId, request);
-            return ResponseEntity.ok(updatedComment);
-        } 
-        catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }       
-
+            @RequestBody UpdateCommentRequest request) {            
+        
+        Comment updatedComment = commentService.updateComment(commentId, request);
+        return ResponseEntity.ok(updatedComment);           
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long postId,
-            @PathVariable Long commentId) {        
-        try {
-            commentService.deleteComment(commentId);
-            return ResponseEntity.ok().build();            
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+            @PathVariable Long commentId) {      
+
+        commentService.deleteComment(commentId);
+        return ResponseEntity.ok().build();     
     }
 }
 

@@ -75,48 +75,32 @@ public class PostController {
             @PathVariable Long id,
             @RequestBody UpdatePostRequest request) {
         
-        log.debug("PUT /api/posts/{} - title: {}", id, request.getTitle());
+        log.debug("PUT /api/posts/{} - title: {}", id, request.getTitle());        
         
-        try {
-            Post updatedPost = postService.updatePost(id, request);
-            return ResponseEntity.ok(updatedPost);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Post updatedPost = postService.updatePost(id, request);
+        return ResponseEntity.ok(updatedPost);        
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        try {
-            postService.deletePost(id);
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) {        
+        postService.deletePost(id);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/likes")
     public ResponseEntity<Integer> incrementLikes(@PathVariable Long id) {
         log.debug("POST /api/posts/{}/likes", id);
-        try{
-            int likesCount = postService.incrementLikes(id);
-            return ResponseEntity.ok(likesCount);
-        }    
-        catch(IllegalArgumentException error){
-            return ResponseEntity.notFound().build();
-        }
+        
+        int likesCount = postService.incrementLikes(id);
+        return ResponseEntity.ok(likesCount);
     }
 
     @DeleteMapping("/{id}/likes")
     public ResponseEntity<Integer> removeLike(@PathVariable Long id) {    
-        log.debug("DELETE /api/posts/{}/likes", id);
-        try{
-            int likesCount = postService.decrementLikes(id);
-            return ResponseEntity.ok(likesCount);
-        }    
-        catch(IllegalArgumentException error){
-            return ResponseEntity.notFound().build();
-        }
+        log.debug("DELETE /api/posts/{}/likes", id);        
+
+        int likesCount = postService.decrementLikes(id);
+        return ResponseEntity.ok(likesCount);       
     }
 
     @PutMapping("/{id}/image")

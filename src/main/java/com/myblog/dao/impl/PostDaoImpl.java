@@ -146,7 +146,11 @@ public class PostDaoImpl implements PostDao {
         jdbcTemplate.update("DELETE FROM comments WHERE post_id = ?", id);
         jdbcTemplate.update("DELETE FROM post_tags WHERE post_id = ?", id);
         jdbcTemplate.update("DELETE FROM post_images WHERE post_id = ?", id);
-        jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
+        
+        int deletedId = jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
+        if(deletedId == 0){
+            throw new IllegalArgumentException("No post with id " + id + " found");
+        }
     }
 
     @Override
