@@ -44,7 +44,7 @@ class PostControllerIntegrationTest {
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         objectMapper = new ObjectMapper();
-        
+
         jdbcTemplate.execute("DELETE FROM post_images");
         jdbcTemplate.execute("DELETE FROM post_tags");
         jdbcTemplate.execute("DELETE FROM comments");
@@ -54,15 +54,15 @@ class PostControllerIntegrationTest {
 
     @Test
     void testGetPosts() throws Exception {
-        mockMvc.perform(get("/api/posts")
-                .param("search", "")
-                .param("pageNumber", "1")
-                .param("pageSize", "10"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.posts").isArray())
-            .andExpect(jsonPath("$.hasPrev").exists())
-            .andExpect(jsonPath("$.hasNext").exists())
-            .andExpect(jsonPath("$.lastPage").exists());
+        mockMvc.perform(get("/posts")  // ← УБРАЛИ /api
+                        .param("search", "")
+                        .param("pageNumber", "1")
+                        .param("pageSize", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.posts").isArray())
+                .andExpect(jsonPath("$.hasPrev").exists())
+                .andExpect(jsonPath("$.hasNext").exists())
+                .andExpect(jsonPath("$.lastPage").exists());
     }
 
     @Test
@@ -72,15 +72,15 @@ class PostControllerIntegrationTest {
         request.setText("New content");
         request.setTags(Arrays.asList("tag1", "tag2"));
 
-        mockMvc.perform(post("/api/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.title").value("New Post"))
-            .andExpect(jsonPath("$.text").value("New content"))
-            .andExpect(jsonPath("$.likesCount").value(0))
-            .andExpect(jsonPath("$.commentsCount").value(0));
+        mockMvc.perform(post("/posts")  // ← УБРАЛИ /api
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title").value("New Post"))
+                .andExpect(jsonPath("$.text").value("New content"))
+                .andExpect(jsonPath("$.likesCount").value(0))
+                .andExpect(jsonPath("$.commentsCount").value(0));
     }
 
     @Test
@@ -91,19 +91,19 @@ class PostControllerIntegrationTest {
         request.setText("Test content");
         request.setTags(Arrays.asList("tag1"));
 
-        String response = mockMvc.perform(post("/api/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+        String response = mockMvc.perform(post("/posts")  // ← УБРАЛИ /api
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Get the post
-        mockMvc.perform(get("/api/posts/" + postId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(postId))
-            .andExpect(jsonPath("$.title").value("Test Post"));
+        mockMvc.perform(get("/posts/" + postId))  // ← УБРАЛИ /api
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(postId))
+                .andExpect(jsonPath("$.title").value("Test Post"));
     }
 
     @Test
@@ -114,11 +114,11 @@ class PostControllerIntegrationTest {
         createRequest.setText("Original content");
         createRequest.setTags(Arrays.asList("tag1"));
 
-        String response = mockMvc.perform(post("/api/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRequest)))
-            .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+        String response = mockMvc.perform(post("/posts")  // ← УБРАЛИ /api
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
@@ -129,12 +129,12 @@ class PostControllerIntegrationTest {
         updateRequest.setText("Updated content");
         updateRequest.setTags(Arrays.asList("tag2"));
 
-        mockMvc.perform(put("/api/posts/" + postId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title").value("Updated Title"))
-            .andExpect(jsonPath("$.text").value("Updated content"));
+        mockMvc.perform(put("/posts/" + postId)  // ← УБРАЛИ /api
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.text").value("Updated content"));
     }
 
     @Test
@@ -145,21 +145,21 @@ class PostControllerIntegrationTest {
         request.setText("Content");
         request.setTags(Arrays.asList());
 
-        String response = mockMvc.perform(post("/api/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+        String response = mockMvc.perform(post("/posts")  // ← УБРАЛИ /api
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Delete the post
-        mockMvc.perform(delete("/api/posts/" + postId))
-            .andExpect(status().isOk());
+        mockMvc.perform(delete("/posts/" + postId))  // ← УБРАЛИ /api
+                .andExpect(status().isOk());
 
         // Verify it's deleted
-        mockMvc.perform(get("/api/posts/" + postId))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/posts/" + postId))  // ← УБРАЛИ /api
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -170,23 +170,22 @@ class PostControllerIntegrationTest {
         request.setText("Content");
         request.setTags(Arrays.asList());
 
-        String response = mockMvc.perform(post("/api/posts")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+        String response = mockMvc.perform(post("/posts")  // ← УБРАЛИ /api
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Increment likes
-        mockMvc.perform(post("/api/posts/" + postId + "/likes"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("1"));
+        mockMvc.perform(post("/posts/" + postId + "/likes"))  // ← УБРАЛИ /api
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"));
 
         // Increment again
-        mockMvc.perform(post("/api/posts/" + postId + "/likes"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("2"));
+        mockMvc.perform(post("/posts/" + postId + "/likes"))  // ← УБРАЛИ /api
+                .andExpect(status().isOk())
+                .andExpect(content().string("2"));
     }
 }
-

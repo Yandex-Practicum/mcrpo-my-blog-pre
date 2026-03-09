@@ -58,15 +58,15 @@ public class PostDaoImpl implements PostDao {
     @Override
     public Optional<Post> findById(Long id) {
         String sql = "SELECT p.id, p.title, p.text, p.likes_count, p.created_at, p.updated_at, " +
-                     "(SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) as comments_count " +
-                     "FROM posts p WHERE p.id = ?";
-        
+                "(SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) as comments_count " +
+                "FROM posts p WHERE p.id = ?";
+
         try {
             Post post = jdbcTemplate.queryForObject(sql, new PostRowMapper(), id);
             if (post != null) {
                 post.setTags(tagDao.findByPostId(id).stream()
-                    .map(tag -> tag.getName())
-                    .toList());
+                        .map(tag -> tag.getName())
+                        .toList());
             }
             return Optional.ofNullable(post);
         } catch (Exception e) {
@@ -81,9 +81,9 @@ public class PostDaoImpl implements PostDao {
         String titleSearch = parseSearchQuery(search, tags);
 
         StringBuilder sql = new StringBuilder(
-            "SELECT p.id, p.title, p.text, p.likes_count, p.created_at, p.updated_at, " +
-            "(SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) as comments_count " +
-            "FROM posts p WHERE 1=1"
+                "SELECT p.id, p.title, p.text, p.likes_count, p.created_at, p.updated_at, " +
+                        "(SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) as comments_count " +
+                        "FROM posts p WHERE 1=1"
         );
 
         List<Object> params = new ArrayList<>();
@@ -98,8 +98,8 @@ public class PostDaoImpl implements PostDao {
         if (!tags.isEmpty()) {
             for (int i = 0; i < tags.size(); i++) {
                 sql.append(" AND EXISTS (SELECT 1 FROM post_tags pt " +
-                          "JOIN tags t ON pt.tag_id = t.id " +
-                          "WHERE pt.post_id = p.id AND t.name = ?)");
+                        "JOIN tags t ON pt.tag_id = t.id " +
+                        "WHERE pt.post_id = p.id AND t.name = ?)");
                 params.add(tags.get(i));
             }
         }
@@ -114,9 +114,9 @@ public class PostDaoImpl implements PostDao {
         // Загрузить теги для каждого поста
         for (Post post : posts) {
             post.setTags(tagDao.findByPostId(post.getId()).stream()
-                .map(tag -> tag.getName())
-                .toList());
-            
+                    .map(tag -> tag.getName())
+                    .toList());
+
             // Обрезать текст до 128 символов для списка
             if (post.getText().length() > 128) {
                 post.setText(post.getText().substring(0, 128) + "…");
@@ -140,16 +140,20 @@ public class PostDaoImpl implements PostDao {
         return findById(post.getId()).orElse(post);
     }
 
+    // ТУТ ИЗМЕНИЛ: Полностью переписал метод delete для каскадного удаления
     @Override
     public void delete(Long id) {
-        // TODO: Реализовать каскадное удаление поста
-        // Порядок удаления:
-        // 1. Удалить все комментарии: DELETE FROM comments WHERE post_id = ?
-        // 2. Удалить все связи с тегами: DELETE FROM post_tags WHERE post_id = ?
-        // 3. Удалить изображение: DELETE FROM post_images WHERE post_id = ?
-        // 4. Удалить сам пост: DELETE FROM posts WHERE id = ?
-        // ВАЖНО: Используйте @Transactional в сервисе для атомарности операции!
-        throw new UnsupportedOperationException("TODO: Implement cascade delete");
+        log.debug("Cascade deleting post with id: {}", id);
+
+        // Благодаря ON DELETE CASCADE в schema.sql, достаточно удалить только пост
+        // Все связанные записи (комментарии, теги, изображения) удалятся автоматически
+
+        String sql = "DELETE FROM posts WHERE id = ?";
+        int rowsAffected = jdbcTemplate.update(sql, id);
+
+        if (rowsAffected == 0) {
+            throw new RuntimeException("Post not found with id: " + id);
+        }
     }
 
     @Override
@@ -158,12 +162,11 @@ public class PostDaoImpl implements PostDao {
         jdbcTemplate.update(sql, id);
     }
 
+    // ТУТ ДОБАВИЛ: Метод для уменьшения лайков с защитой от отрицательных значений
     @Override
     public void decrementLikes(Long id) {
-        // TODO: Реализовать уменьшение счётчика лайков на 1
-        // Используйте GREATEST(likes_count - 1, 0) чтобы не уйти в минус
-        // Пример SQL: UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?
-        throw new UnsupportedOperationException("TODO: Implement decrementLikes");
+        String sql = "UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     @Override
@@ -182,8 +185,8 @@ public class PostDaoImpl implements PostDao {
         if (!tags.isEmpty()) {
             for (int i = 0; i < tags.size(); i++) {
                 sql.append(" AND EXISTS (SELECT 1 FROM post_tags pt " +
-                          "JOIN tags t ON pt.tag_id = t.id " +
-                          "WHERE pt.post_id = p.id AND t.name = ?)");
+                        "JOIN tags t ON pt.tag_id = t.id " +
+                        "WHERE pt.post_id = p.id AND t.name = ?)");
                 params.add(tags.get(i));
             }
         }
@@ -228,10 +231,10 @@ public class PostDaoImpl implements PostDao {
             if (tagName == null || tagName.trim().isEmpty()) {
                 continue;
             }
-            
+
             // Удалить # если есть
             String cleanTagName = tagName.startsWith("#") ? tagName.substring(1) : tagName;
-            
+
             // Найти или создать тег
             Optional<com.myblog.model.Tag> existingTag = tagDao.findByName(cleanTagName);
             Long tagId;
@@ -241,7 +244,7 @@ public class PostDaoImpl implements PostDao {
                 com.myblog.model.Tag newTag = tagDao.create(cleanTagName);
                 tagId = newTag.getId();
             }
-            
+
             // Связать тег с постом
             tagDao.linkTagToPost(tagId, postId);
         }
@@ -259,7 +262,7 @@ public class PostDaoImpl implements PostDao {
             if (word.isEmpty()) {
                 continue;
             }
-            
+
             if (word.startsWith("#")) {
                 // Это тег
                 String tagName = word.substring(1);
@@ -293,4 +296,3 @@ public class PostDaoImpl implements PostDao {
         }
     }
 }
-
