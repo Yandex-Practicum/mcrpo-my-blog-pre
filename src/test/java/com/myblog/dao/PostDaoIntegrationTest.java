@@ -1,16 +1,12 @@
 package com.myblog.dao;
 
-import com.myblog.config.DatabaseConfig;
-import com.myblog.dao.impl.PostDaoImpl;
-import com.myblog.dao.impl.TagDaoImpl;
+import com.myblog.MyBlogApplication;
 import com.myblog.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -19,8 +15,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DatabaseConfig.class, PostDaoImpl.class, TagDaoImpl.class})
+@SpringBootTest(classes = MyBlogApplication.class)
 @Transactional
 class PostDaoIntegrationTest {
 
