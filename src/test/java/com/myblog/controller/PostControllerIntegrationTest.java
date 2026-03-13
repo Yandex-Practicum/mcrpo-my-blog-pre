@@ -1,9 +1,6 @@
 package com.myblog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myblog.config.DatabaseConfig;
-import com.myblog.config.RootConfig;
-import com.myblog.config.WebConfig;
 import com.myblog.dto.CreatePostRequest;
 import com.myblog.dto.UpdatePostRequest;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +14,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
@@ -25,26 +24,22 @@ import java.util.Arrays;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {RootConfig.class, WebConfig.class, DatabaseConfig.class})
-@WebAppConfiguration
+@SpringBootTest
+@AutoConfigureMockMvc
 @Transactional
 class PostControllerIntegrationTest {
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        objectMapper = new ObjectMapper();
-        
         jdbcTemplate.execute("DELETE FROM post_images");
         jdbcTemplate.execute("DELETE FROM post_tags");
         jdbcTemplate.execute("DELETE FROM comments");
@@ -58,11 +53,11 @@ class PostControllerIntegrationTest {
                 .param("search", "")
                 .param("pageNumber", "1")
                 .param("pageSize", "10"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.posts").isArray())
-            .andExpect(jsonPath("$.hasPrev").exists())
-            .andExpect(jsonPath("$.hasNext").exists())
-            .andExpect(jsonPath("$.lastPage").exists());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.posts").isArray())
+                .andExpect(jsonPath("$.hasPrev").exists())
+                .andExpect(jsonPath("$.hasNext").exists())
+                .andExpect(jsonPath("$.lastPage").exists());
     }
 
     @Test
@@ -75,12 +70,12 @@ class PostControllerIntegrationTest {
         mockMvc.perform(post("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.title").value("New Post"))
-            .andExpect(jsonPath("$.text").value("New content"))
-            .andExpect(jsonPath("$.likesCount").value(0))
-            .andExpect(jsonPath("$.commentsCount").value(0));
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.title").value("New Post"))
+                .andExpect(jsonPath("$.text").value("New content"))
+                .andExpect(jsonPath("$.likesCount").value(0))
+                .andExpect(jsonPath("$.commentsCount").value(0));
     }
 
     @Test
@@ -94,16 +89,16 @@ class PostControllerIntegrationTest {
         String response = mockMvc.perform(post("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Get the post
         mockMvc.perform(get("/api/posts/" + postId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(postId))
-            .andExpect(jsonPath("$.title").value("Test Post"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(postId))
+                .andExpect(jsonPath("$.title").value("Test Post"));
     }
 
     @Test
@@ -117,8 +112,8 @@ class PostControllerIntegrationTest {
         String response = mockMvc.perform(post("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createRequest)))
-            .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
@@ -132,9 +127,9 @@ class PostControllerIntegrationTest {
         mockMvc.perform(put("/api/posts/" + postId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title").value("Updated Title"))
-            .andExpect(jsonPath("$.text").value("Updated content"));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.title").value("Updated Title"))
+                .andExpect(jsonPath("$.text").value("Updated content"));
     }
 
     @Test
@@ -148,18 +143,18 @@ class PostControllerIntegrationTest {
         String response = mockMvc.perform(post("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Delete the post
         mockMvc.perform(delete("/api/posts/" + postId))
-            .andExpect(status().isOk());
+                .andExpect(status().isOk());
 
         // Verify it's deleted
         mockMvc.perform(get("/api/posts/" + postId))
-            .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -173,20 +168,19 @@ class PostControllerIntegrationTest {
         String response = mockMvc.perform(post("/api/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn().getResponse().getContentAsString();
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Increment likes
         mockMvc.perform(post("/api/posts/" + postId + "/likes"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("1"));
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"));
 
         // Increment again
         mockMvc.perform(post("/api/posts/" + postId + "/likes"))
-            .andExpect(status().isOk())
-            .andExpect(content().string("2"));
+                .andExpect(status().isOk())
+                .andExpect(content().string("2"));
     }
 }
-

@@ -1,6 +1,5 @@
 package com.myblog.dao;
 
-import com.myblog.config.DatabaseConfig;
 import com.myblog.dao.impl.PostDaoImpl;
 import com.myblog.dao.impl.TagDaoImpl;
 import com.myblog.model.Post;
@@ -9,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -19,8 +17,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DatabaseConfig.class, PostDaoImpl.class, TagDaoImpl.class})
+@SpringBootTest
 @Transactional
 class PostDaoIntegrationTest {
 
@@ -54,7 +51,7 @@ class PostDaoIntegrationTest {
         assertNotNull(createdPost.getId());
         assertEquals("Test Post", createdPost.getTitle());
         assertEquals(0, createdPost.getLikesCount());
-        
+
         Optional<Post> foundPost = postDao.findById(createdPost.getId());
         assertTrue(foundPost.isPresent());
         assertEquals(createdPost.getId(), foundPost.get().getId());
@@ -194,13 +191,13 @@ class PostDaoIntegrationTest {
         post1.setText("Content");
         post1.setTags(Arrays.asList());
         postDao.create(post1);
-        
+
         Post post2 = new Post();
         post2.setTitle("Post 2");
         post2.setText("Content");
         post2.setTags(Arrays.asList());
         postDao.create(post2);
-        
+
         Post post3 = new Post();
         post3.setTitle("Post 3");
         post3.setText("Content");
@@ -214,4 +211,3 @@ class PostDaoIntegrationTest {
         assertEquals(3, count);
     }
 }
-

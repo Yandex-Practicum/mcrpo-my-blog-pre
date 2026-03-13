@@ -7,10 +7,9 @@ import com.myblog.model.Comment;
 import com.myblog.service.impl.CommentServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,14 +19,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class CommentServiceTest {
 
-    @Mock
+    @MockBean
     private CommentDao commentDao;
 
-    @InjectMocks
-    private CommentServiceImpl commentService;
+    @Autowired
+    private CommentService commentService;
 
     private Comment testComment;
 
@@ -52,7 +51,7 @@ class CommentServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(testComment.getId(), result.get(0).getId());
-        
+
         verify(commentDao).findByPostId(1L);
     }
 
@@ -67,7 +66,7 @@ class CommentServiceTest {
         // Then
         assertTrue(result.isPresent());
         assertEquals(testComment.getId(), result.get().getId());
-        
+
         verify(commentDao).findById(1L);
     }
 
@@ -77,7 +76,7 @@ class CommentServiceTest {
         CreateCommentRequest request = new CreateCommentRequest();
         request.setText("New comment");
         request.setPostId(1L);
-        
+
         when(commentDao.create(any(Comment.class))).thenReturn(testComment);
 
         // When
@@ -86,7 +85,7 @@ class CommentServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(testComment.getId(), result.getId());
-        
+
         verify(commentDao).create(any(Comment.class));
     }
 
@@ -97,7 +96,7 @@ class CommentServiceTest {
         request.setId(1L);
         request.setText("Updated comment");
         request.setPostId(1L);
-        
+
         when(commentDao.findById(1L)).thenReturn(Optional.of(testComment));
         when(commentDao.update(any(Comment.class))).thenReturn(testComment);
 
@@ -106,7 +105,7 @@ class CommentServiceTest {
 
         // Then
         assertNotNull(result);
-        
+
         verify(commentDao).findById(1L);
         verify(commentDao).update(any(Comment.class));
     }
@@ -118,14 +117,14 @@ class CommentServiceTest {
         request.setId(999L);
         request.setText("Updated comment");
         request.setPostId(1L);
-        
+
         when(commentDao.findById(999L)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
             commentService.updateComment(999L, request);
         });
-        
+
         verify(commentDao).findById(999L);
         verify(commentDao, never()).update(any(Comment.class));
     }
@@ -139,4 +138,3 @@ class CommentServiceTest {
         verify(commentDao).delete(1L);
     }
 }
-

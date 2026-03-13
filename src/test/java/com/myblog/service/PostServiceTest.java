@@ -8,10 +8,9 @@ import com.myblog.model.Post;
 import com.myblog.service.impl.PostServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Arrays;
 import java.util.List;
@@ -21,14 +20,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 class PostServiceTest {
 
-    @Mock
+    @MockBean
     private PostDao postDao;
 
-    @InjectMocks
-    private PostServiceImpl postService;
+    @Autowired
+    private PostService postService;
 
     private Post testPost;
 
@@ -60,7 +59,7 @@ class PostServiceTest {
         assertFalse(response.isHasPrev());
         assertFalse(response.isHasNext());
         assertEquals(1, response.getLastPage());
-        
+
         verify(postDao).findAll("", 1, 10);
         verify(postDao).getTotalCount("");
     }
@@ -77,7 +76,7 @@ class PostServiceTest {
         assertTrue(result.isPresent());
         assertEquals(testPost.getId(), result.get().getId());
         assertEquals(testPost.getTitle(), result.get().getTitle());
-        
+
         verify(postDao).findById(1L);
     }
 
@@ -88,7 +87,7 @@ class PostServiceTest {
         request.setTitle("New Post");
         request.setText("New content");
         request.setTags(Arrays.asList("tag1"));
-        
+
         when(postDao.create(any(Post.class))).thenReturn(testPost);
 
         // When
@@ -97,7 +96,7 @@ class PostServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(testPost.getId(), result.getId());
-        
+
         verify(postDao).create(any(Post.class));
     }
 
@@ -109,7 +108,7 @@ class PostServiceTest {
         request.setTitle("Updated Post");
         request.setText("Updated content");
         request.setTags(Arrays.asList("tag1"));
-        
+
         when(postDao.findById(1L)).thenReturn(Optional.of(testPost));
         when(postDao.update(any(Post.class))).thenReturn(testPost);
 
@@ -118,7 +117,7 @@ class PostServiceTest {
 
         // Then
         assertNotNull(result);
-        
+
         verify(postDao).findById(1L);
         verify(postDao).update(any(Post.class));
     }
@@ -131,14 +130,14 @@ class PostServiceTest {
         request.setTitle("Updated Post");
         request.setText("Updated content");
         request.setTags(Arrays.asList("tag1"));
-        
+
         when(postDao.findById(999L)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
             postService.updatePost(999L, request);
         });
-        
+
         verify(postDao).findById(999L);
         verify(postDao, never()).update(any(Post.class));
     }
@@ -161,7 +160,7 @@ class PostServiceTest {
         likedPost.setText("Test content");
         likedPost.setLikesCount(5);
         likedPost.setCommentsCount(0);
-        
+
         when(postDao.findById(1L)).thenReturn(Optional.of(likedPost));
 
         // When
@@ -169,9 +168,8 @@ class PostServiceTest {
 
         // Then
         assertEquals(5, likesCount);
-        
+
         verify(postDao).incrementLikes(1L);
         verify(postDao).findById(1L);
     }
 }
-
