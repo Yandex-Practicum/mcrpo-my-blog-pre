@@ -1,33 +1,26 @@
 package com.myblog.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myblog.config.DatabaseConfig;
-import com.myblog.config.RootConfig;
-import com.myblog.config.WebConfig;
 import com.myblog.dto.CreatePostRequest;
 import com.myblog.dto.UpdatePostRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.Arrays;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {RootConfig.class, WebConfig.class, DatabaseConfig.class})
-@WebAppConfiguration
+@SpringBootTest
 @Transactional
 class PostControllerIntegrationTest {
 
@@ -54,7 +47,7 @@ class PostControllerIntegrationTest {
 
     @Test
     void testGetPosts() throws Exception {
-        mockMvc.perform(get("/api/posts")
+        mockMvc.perform(get("/posts")
                 .param("search", "")
                 .param("pageNumber", "1")
                 .param("pageSize", "10"))
@@ -72,7 +65,7 @@ class PostControllerIntegrationTest {
         request.setText("New content");
         request.setTags(Arrays.asList("tag1", "tag2"));
 
-        mockMvc.perform(post("/api/posts")
+        mockMvc.perform(post("/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -91,7 +84,7 @@ class PostControllerIntegrationTest {
         request.setText("Test content");
         request.setTags(Arrays.asList("tag1"));
 
-        String response = mockMvc.perform(post("/api/posts")
+        String response = mockMvc.perform(post("/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -100,7 +93,7 @@ class PostControllerIntegrationTest {
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Get the post
-        mockMvc.perform(get("/api/posts/" + postId))
+        mockMvc.perform(get("/posts/" + postId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(postId))
             .andExpect(jsonPath("$.title").value("Test Post"));
@@ -114,7 +107,7 @@ class PostControllerIntegrationTest {
         createRequest.setText("Original content");
         createRequest.setTags(Arrays.asList("tag1"));
 
-        String response = mockMvc.perform(post("/api/posts")
+        String response = mockMvc.perform(post("/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createRequest)))
             .andExpect(status().isCreated())
@@ -129,7 +122,7 @@ class PostControllerIntegrationTest {
         updateRequest.setText("Updated content");
         updateRequest.setTags(Arrays.asList("tag2"));
 
-        mockMvc.perform(put("/api/posts/" + postId)
+        mockMvc.perform(put("/posts/" + postId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
             .andExpect(status().isOk())
@@ -145,7 +138,7 @@ class PostControllerIntegrationTest {
         request.setText("Content");
         request.setTags(Arrays.asList());
 
-        String response = mockMvc.perform(post("/api/posts")
+        String response = mockMvc.perform(post("/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -154,11 +147,11 @@ class PostControllerIntegrationTest {
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Delete the post
-        mockMvc.perform(delete("/api/posts/" + postId))
+        mockMvc.perform(delete("/posts/" + postId))
             .andExpect(status().isOk());
 
         // Verify it's deleted
-        mockMvc.perform(get("/api/posts/" + postId))
+        mockMvc.perform(get("/posts/" + postId))
             .andExpect(status().isNotFound());
     }
 
@@ -170,7 +163,7 @@ class PostControllerIntegrationTest {
         request.setText("Content");
         request.setTags(Arrays.asList());
 
-        String response = mockMvc.perform(post("/api/posts")
+        String response = mockMvc.perform(post("/posts")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
@@ -179,14 +172,104 @@ class PostControllerIntegrationTest {
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
         // Increment likes
-        mockMvc.perform(post("/api/posts/" + postId + "/likes"))
+        mockMvc.perform(post("/posts/" + postId + "/likes"))
             .andExpect(status().isOk())
             .andExpect(content().string("1"));
 
         // Increment again
-        mockMvc.perform(post("/api/posts/" + postId + "/likes"))
+        mockMvc.perform(post("/posts/" + postId + "/likes"))
             .andExpect(status().isOk())
             .andExpect(content().string("2"));
+    }
+
+    //Тест метода RemoveLikes() класса PostController на успешное удаление лайков
+    @Test
+    void testRemoveLikes() throws Exception {
+        // Create a post first
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Post with Likes");
+        request.setText("Content");
+        request.setTags(Arrays.asList());
+
+        String response = mockMvc.perform(post("/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long postId = objectMapper.readTree(response).get("id").asLong();
+
+        // Increment likes
+        mockMvc.perform(post("/posts/" + postId + "/likes"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"));
+
+        // Increment again
+        mockMvc.perform(post("/posts/" + postId + "/likes"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("2"));
+
+        // Decrement likes
+        mockMvc.perform(delete("/posts/" + postId + "/likes"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("1"));
+
+        // Decrement again
+        mockMvc.perform(delete("/posts/" + postId + "/likes"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0"));
+    }
+
+    //Тест метода IncrementLikes() класса PostController на добавление лайков несуществующего поста
+    //(IncrementLikes() возврат 404 при несуществующем посте?)
+    @Test
+    void testIncrementLikesForNonExistentPost() throws Exception {
+        Long postId = 100L;
+
+        // Increment likes
+        mockMvc.perform(post("/posts/" + postId + "/likes"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0"));
+
+
+    }
+
+    //Тест метода RemoveLikes() класса PostController на удаление лайков несуществующего поста
+    @Test
+    void testRemoveLikesForNonExistentPost() throws Exception {
+        Long postId = 100L;
+
+        // Decrement likes
+        mockMvc.perform(delete("/posts/" + postId + "/likes"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0"));
+
+
+    }
+
+    //Тест метода RemoveLikes() класса PostController на неотрицательное количество лайков
+    @Test
+    void testRemoveLikesNonNegative() throws Exception {
+        // Create a post first
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Post without Likes");
+        request.setText("Content");
+        request.setTags(Arrays.asList());
+
+        String response = mockMvc.perform(post("/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+
+        Long postId = objectMapper.readTree(response).get("id").asLong();
+
+        // Decrement likes
+        mockMvc.perform(delete("/posts/" + postId + "/likes"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("0"));
+
+
     }
 }
 

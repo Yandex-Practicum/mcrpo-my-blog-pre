@@ -1,16 +1,14 @@
 package com.myblog.dao;
 
-import com.myblog.config.DatabaseConfig;
 import com.myblog.dao.impl.PostDaoImpl;
 import com.myblog.dao.impl.TagDaoImpl;
 import com.myblog.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.jdbc.test.autoconfigure.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -19,8 +17,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DatabaseConfig.class, PostDaoImpl.class, TagDaoImpl.class})
+@JdbcTest
+@ContextConfiguration(classes = {PostDaoImpl.class, TagDaoImpl.class})
 @Transactional
 class PostDaoIntegrationTest {
 
@@ -212,6 +210,47 @@ class PostDaoIntegrationTest {
 
         // Then
         assertEquals(3, count);
+    }
+
+    //Тест метода decrementLikes() класса PostDaoImpl на успешное удаление лайков
+    @Test
+    void testDecrementLikes() {
+        // Given
+        Post post = new Post();
+        post.setTitle("Test Post");
+        post.setText("Test content");
+        post.setTags(Arrays.asList());
+//        post.setLikesCount(2);
+        Post createdPost = postDao.create(post);// likesCount = 0
+        postDao.incrementLikes(createdPost.getId());
+        postDao.incrementLikes(createdPost.getId());
+
+        // When
+        postDao.decrementLikes(createdPost.getId());
+
+        // Then
+        Optional<Post> updatedPost = postDao.findById(createdPost.getId());
+        assertTrue(updatedPost.isPresent());
+        assertEquals(1, updatedPost.get().getLikesCount());
+    }
+
+    //Тест метода decrementLikes() класса PostDaoImpl на неотрицательное количество лайков
+    @Test
+    void testDecrementLikesNonNegative() {
+        // Given
+        Post post = new Post();
+        post.setTitle("Test Post");
+        post.setText("Test content");
+        post.setTags(Arrays.asList());
+        Post createdPost = postDao.create(post);
+
+        // When
+        postDao.decrementLikes(createdPost.getId());
+
+        // Then
+        Optional<Post> updatedPost = postDao.findById(createdPost.getId());
+        assertTrue(updatedPost.isPresent());
+        assertEquals(0, updatedPost.get().getLikesCount());
     }
 }
 

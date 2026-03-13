@@ -173,5 +173,64 @@ class PostServiceTest {
         verify(postDao).incrementLikes(1L);
         verify(postDao).findById(1L);
     }
+
+    //Тест метода IncrementLikes() класса PostServiceImpl на добавление лайков при несуществующем посте
+    @Test
+    void testIncrementLikesForNonExistentPost() {
+        // Given
+        Long postId = 100L;
+
+        when(postDao.findById(postId)).thenReturn(Optional.empty());
+
+        // When
+        int likesCount = postService.incrementLikes(postId);
+
+        // Then
+        assertEquals(0, likesCount);
+
+        verify(postDao).incrementLikes(postId);
+        verify(postDao).findById(postId);
+    }
+
+    //Тест метода DecrementLikes() класса PostServiceImpl на успешное удаление лайков
+    @Test
+    void testDecrementLikes() {
+        // Given
+        Post likedPost = new Post();
+        likedPost.setId(1L);
+        likedPost.setTitle("Test Post");
+        likedPost.setText("Test content");
+        likedPost.setLikesCount(5);
+        likedPost.setCommentsCount(0);
+
+        when(postDao.findById(1L)).thenReturn(Optional.of(likedPost));
+
+        // When
+        int likesCount = postService.decrementLikes(1L);
+
+        // Then
+        assertEquals(5, likesCount);
+
+        verify(postDao).decrementLikes(1L);
+        verify(postDao).findById(1L);
+    }
+
+    //Тест метода DecrementLikes() класса PostServiceImpl на удаление лайков при несуществующем посте
+    @Test
+    void testDecrementLikesForNonExistentPost() {
+        // Given
+        Long postId = 100L;
+
+        when(postDao.findById(postId)).thenReturn(Optional.empty());
+
+        // When
+        int likesCount = postService.decrementLikes(postId);
+
+        // Then
+        assertEquals(0, likesCount);
+
+        verify(postDao).decrementLikes(postId);
+        verify(postDao).findById(postId);
+    }
 }
 
