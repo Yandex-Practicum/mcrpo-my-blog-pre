@@ -62,21 +62,21 @@ public class CommentDaoImpl implements CommentDao {
         return jdbcTemplate.query(sql, new CommentRowMapper(), postId);
     }
 
+    // ТУТ ДОБАВИЛ: Полная реализация метода update
     @Override
     public Comment update(Comment comment) {
-        // TODO: Реализовать обновление комментария
-        // 1. Выполнить SQL UPDATE: UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-        // 2. Вернуть обновлённый комментарий через findById(comment.getId())
-        // Пример: String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
-        throw new UnsupportedOperationException("TODO: Implement update");
+        String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+        jdbcTemplate.update(sql, comment.getText(), comment.getId());
+
+        return findById(comment.getId())
+                .orElseThrow(() -> new RuntimeException("Comment not found after update"));
     }
 
+    // ТУТ ДОБАВИЛ: Полная реализация метода delete
     @Override
     public void delete(Long id) {
-        // TODO: Реализовать удаление комментария
-        // Выполнить SQL DELETE: DELETE FROM comments WHERE id = ?
-        // Пример: String sql = "DELETE FROM comments WHERE id = ?";
-        throw new UnsupportedOperationException("TODO: Implement delete");
+        String sql = "DELETE FROM comments WHERE id = ?";
+        jdbcTemplate.update(sql, id);
     }
 
     @Override
@@ -99,4 +99,3 @@ public class CommentDaoImpl implements CommentDao {
         }
     }
 }
-

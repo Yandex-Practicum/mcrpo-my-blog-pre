@@ -4,6 +4,26 @@ import './App.css';
 
 const API_URL = 'http://localhost:8080/api';
 
+// Добавьте где-нибудь в начале файла
+window.testCreatePost = async () => {
+  try {
+    const response = await fetch('http://localhost:8080/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Test Post',
+        text: 'Test Content',
+        tags: ['test']
+      })
+    });
+    console.log('Status:', response.status);
+    const text = await response.text();
+    console.log('Response:', text);
+  } catch (e) {
+    console.error('Error:', e);
+  }
+};
+
 // Главная страница со списком постов
 function HomePage() {
   const [posts, setPosts] = useState([]);
@@ -143,7 +163,9 @@ function PostCard({ post, onUpdate }) {
   );
 }
 
-// Страница просмотра поста
+// ============================================
+// НАЧАЛО ИЗМЕНЕНИЙ: Обновленный компонент PostPage
+// ============================================
 function PostPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -152,6 +174,10 @@ function PostPage() {
   const [newComment, setNewComment] = useState('');
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  
+  // ТУТ ДОБАВИЛ: новые состояния для редактирования комментариев
+  const [editingComment, setEditingComment] = useState(null);
+  const [editText, setEditText] = useState('');
 
   useEffect(() => {
     loadPost();
@@ -203,6 +229,60 @@ function PostPage() {
       }
     } catch (error) {
       console.error('Ошибка добавления комментария:', error);
+    }
+  };
+
+  // ТУТ ДОБАВИЛ: функция для начала редактирования комментария
+  const handleEditComment = (comment) => {
+    setEditingComment(comment);
+    setEditText(comment.text);
+  };
+
+  // ТУТ ДОБАВИЛ: функция для сохранения отредактированного комментария
+  const handleSaveEdit = async () => {
+    if (!editText.trim()) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/posts/${id}/comments/${editingComment.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingComment.id,
+          text: editText,
+          postId: parseInt(id)
+        })
+      });
+      
+      if (response.ok) {
+        setEditingComment(null);
+        setEditText('');
+        loadComments(); // Перезагрузить комментарии
+      }
+    } catch (error) {
+      console.error('Ошибка редактирования комментария:', error);
+    }
+  };
+
+  // ТУТ ДОБАВИЛ: функция для отмены редактирования
+  const handleCancelEdit = () => {
+    setEditingComment(null);
+    setEditText('');
+  };
+
+  // ТУТ ДОБАВИЛ: функция для удаления комментария
+  const handleDeleteComment = async (commentId) => {
+
+    try {
+      const response = await fetch(`${API_URL}/posts/${id}/comments/${commentId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response.ok) {
+        loadComments(); // Перезагрузить комментарии
+        loadPost(); // Обновить счётчик комментариев
+      }
+    } catch (error) {
+      console.error('Ошибка удаления комментария:', error);
     }
   };
 
@@ -258,6 +338,30 @@ function PostPage() {
 
           <section className="comments-section">
             <h2>Комментарии</h2>
+            
+            {/* ТУТ ДОБАВИЛ: форма редактирования комментария */}
+            {editingComment && (
+              <div className="edit-comment-form" style={{ 
+                marginBottom: '20px', 
+                padding: '15px', 
+                background: '#f0f0f0', 
+                borderRadius: '8px' 
+              }}>
+                <h3>Редактировать комментарий</h3>
+                <textarea
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  rows="3"
+                  className="textarea"
+                  style={{ marginBottom: '10px' }}
+                />
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <button onClick={handleSaveEdit} className="btn btn-primary">Сохранить</button>
+                  <button onClick={handleCancelEdit} className="btn btn-secondary">Отмена</button>
+                </div>
+              </div>
+            )}
+
             <form onSubmit={handleAddComment} className="comment-form">
               <textarea
                 value={newComment}
@@ -273,6 +377,23 @@ function PostPage() {
               {comments.map(comment => (
                 <div key={comment.id} className="comment">
                   <p>{comment.text}</p>
+                  {/* ТУТ ДОБАВИЛ: кнопки редактирования и удаления для каждого комментария */}
+                  <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                    <button 
+                      onClick={() => handleEditComment(comment)} 
+                      className="btn-icon"
+                      title="Редактировать"
+                    >
+                      ✏️
+                    </button>
+                    <button 
+                      onClick={() => handleDeleteComment(comment.id)} 
+                      className="btn-icon"
+                      title="Удалить"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -282,6 +403,9 @@ function PostPage() {
     </div>
   );
 }
+// ============================================
+// КОНЕЦ ИЗМЕНЕНИЙ
+// ============================================
 
 // Форма создания поста
 function CreatePostPage() {

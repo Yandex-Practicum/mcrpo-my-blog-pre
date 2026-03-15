@@ -18,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/posts")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PostController {
 
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
@@ -32,7 +33,7 @@ public class PostController {
             @RequestParam(required = true) String search,
             @RequestParam(required = true) int pageNumber,
             @RequestParam(required = true) int pageSize) {
-        
+
         log.debug("GET /api/posts - search: {}, pageNumber: {}, pageSize: {}", search, pageNumber, pageSize);
         PostListResponse response = postService.getPosts(search, pageNumber, pageSize);
         return ResponseEntity.ok(response);
@@ -43,7 +44,7 @@ public class PostController {
         log.debug("GET /api/posts/{}", id);
         Optional<Post> post = postService.getPostById(id);
         return post.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}")
@@ -51,7 +52,7 @@ public class PostController {
         log.debug("POST /api/posts/{}", id);
         Optional<Post> post = postService.getPostById(id);
         return post.map(ResponseEntity::ok)
-                   .orElse(ResponseEntity.notFound().build());
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -65,9 +66,9 @@ public class PostController {
     public ResponseEntity<Post> updatePost(
             @PathVariable Long id,
             @RequestBody UpdatePostRequest request) {
-        
+
         log.debug("PUT /api/posts/{} - title: {}", id, request.getTitle());
-        
+
         try {
             Post updatedPost = postService.updatePost(id, request);
             return ResponseEntity.ok(updatedPost);
@@ -78,11 +79,14 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postService.deletePost(id)
-        // 2. Вернуть ResponseEntity.ok().build()
-        // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+        log.debug("DELETE /api/posts/{}", id);
+
+        try {
+            postService.deletePost(id);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping("/{id}/likes")
@@ -94,19 +98,23 @@ public class PostController {
 
     @DeleteMapping("/{id}/likes")
     public ResponseEntity<Integer> removeLike(@PathVariable Long id) {
-        // TODO: Реализовать удаление лайка
-        // 1. Вызвать postService.decrementLikes(id)
-        // 2. Вернуть ResponseEntity.ok() с новым количеством лайков
-        throw new UnsupportedOperationException("TODO: Implement removeLike");
+        log.debug("DELETE /api/posts/{}/likes", id);
+
+        try {
+            int likesCount = postService.decrementLikes(id);
+            return ResponseEntity.ok(likesCount);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PutMapping("/{id}/image")
     public ResponseEntity<Void> uploadImage(
             @PathVariable Long id,
             @RequestParam("image") MultipartFile image) {
-        
+
         log.debug("PUT /api/posts/{}/image - filename: {}", id, image.getOriginalFilename());
-        
+
         try {
             byte[] imageData = image.getBytes();
             String contentType = image.getContentType();
@@ -121,20 +129,19 @@ public class PostController {
     @GetMapping("/{id}/image")
     public ResponseEntity<byte[]> getImage(@PathVariable Long id) {
         log.debug("GET /api/posts/{}/image", id);
-        
+
         Optional<byte[]> imageData = postService.getImage(id);
         if (imageData.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        
+
         Optional<String> contentType = postService.getImageContentType(id);
         MediaType mediaType = contentType
-            .map(MediaType::parseMediaType)
-            .orElse(MediaType.IMAGE_JPEG);
-        
+                .map(MediaType::parseMediaType)
+                .orElse(MediaType.IMAGE_JPEG);
+
         return ResponseEntity.ok()
-            .contentType(mediaType)
-            .body(imageData.get());
+                .contentType(mediaType)
+                .body(imageData.get());
     }
 }
-

@@ -28,11 +28,11 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public PostListResponse getPosts(String search, int pageNumber, int pageSize) {
         log.debug("Getting posts with search: {}, page: {}, size: {}", search, pageNumber, pageSize);
-        
+
         List<Post> posts = postDao.findAll(search, pageNumber, pageSize);
         int totalCount = postDao.getTotalCount(search);
         int lastPage = (int) Math.ceil((double) totalCount / pageSize);
-        
+
         return new PostListResponse(posts, pageNumber > 1, pageNumber < lastPage, lastPage);
     }
 
@@ -47,12 +47,12 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Post createPost(CreatePostRequest request) {
         log.debug("Creating new post with title: {}", request.getTitle());
-        
+
         Post post = new Post();
         post.setTitle(request.getTitle());
         post.setText(request.getText());
         post.setTags(request.getTags());
-        
+
         return postDao.create(post);
     }
 
@@ -60,28 +60,33 @@ public class PostServiceImpl implements PostService {
     @Transactional
     public Post updatePost(Long id, UpdatePostRequest request) {
         log.debug("Updating post with id: {}", id);
-        
+
         Optional<Post> existingPost = postDao.findById(id);
         if (existingPost.isEmpty()) {
             throw new IllegalArgumentException("Post not found with id: " + id);
         }
-        
+
         Post post = existingPost.get();
         post.setTitle(request.getTitle());
         post.setText(request.getText());
         post.setTags(request.getTags());
-        
+
         return postDao.update(post);
     }
 
+    // ТУТ ДОБАВИЛ: Полная реализация метода deletePost
     @Override
     @Transactional
     public void deletePost(Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postDao.delete(id)
-        // ВАЖНО: Метод уже помечен @Transactional - это обеспечит атомарность каскадного удаления
-        // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+        log.debug("Deleting post with id: {}", id);
+
+        // Проверяем существование поста
+        Optional<Post> existingPost = postDao.findById(id);
+        if (existingPost.isEmpty()) {
+            throw new IllegalArgumentException("Post not found with id: " + id);
+        }
+
+        postDao.delete(id);
     }
 
     @Override
@@ -89,19 +94,27 @@ public class PostServiceImpl implements PostService {
     public int incrementLikes(Long id) {
         log.debug("Incrementing likes for post with id: {}", id);
         postDao.incrementLikes(id);
-        
+
         Optional<Post> post = postDao.findById(id);
         return post.map(Post::getLikesCount).orElse(0);
     }
 
+    // ТУТ ДОБАВИЛ: Полная реализация метода decrementLikes
     @Override
     @Transactional
     public int decrementLikes(Long id) {
-        // TODO: Реализовать уменьшение лайков
-        // 1. Вызвать postDao.decrementLikes(id)
-        // 2. Получить обновлённый пост через postDao.findById(id)
-        // 3. Вернуть новое значение likesCount
-        throw new UnsupportedOperationException("TODO: Implement decrementLikes");
+        log.debug("Decrementing likes for post with id: {}", id);
+
+        // Проверяем существование поста
+        Optional<Post> existingPost = postDao.findById(id);
+        if (existingPost.isEmpty()) {
+            throw new IllegalArgumentException("Post not found with id: " + id);
+        }
+
+        postDao.decrementLikes(id);
+
+        Optional<Post> post = postDao.findById(id);
+        return post.map(Post::getLikesCount).orElse(0);
     }
 
     @Override
@@ -124,4 +137,3 @@ public class PostServiceImpl implements PostService {
         return postDao.getImageContentType(postId);
     }
 }
-
