@@ -67,7 +67,7 @@ public class PostDaoImpl implements PostDao {
             if (post != null) {
                 post.setTags(tagDao.findByPostId(id).stream()
                         .map(tag -> tag.getName())
-                        .collect(Collectors.toList()));
+                        .toList());
             }
             return Optional.ofNullable(post);
         } catch (Exception e) {
@@ -115,7 +115,7 @@ public class PostDaoImpl implements PostDao {
         for (Post post : posts) {
             post.setTags(tagDao.findByPostId(post.getId()).stream()
                     .map(tag -> tag.getName())
-                    .collect(Collectors.toList()));
+                    .toList());
 
             // Обрезать текст до 128 символов для списка
             if (post.getText().length() > 128) {
