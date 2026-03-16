@@ -1,17 +1,28 @@
-package com.myblog.service;
+package com.myblog.service.impl;
 
-import com.myblog.dto.CreateCommentRequest;
-import com.myblog.dto.UpdateCommentRequest;
+import com.myblog.dao.CommentDao;
 import com.myblog.model.Comment;
+import com.myblog.service.CommentService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface CommentService {
-    List<Comment> getCommentsByPostId(Long postId);
-    Optional<Comment> getCommentById(Long commentId);
-    Comment createComment(CreateCommentRequest request);
-    Comment updateComment(Long commentId, UpdateCommentRequest request);
-    void deleteComment(Long commentId);
+@Service  
+public class CommentServiceImpl implements CommentService {
+	
+    @Autowired  
+    private CommentDao commentDao;
 }
 
+@Override  
+public Comment updateComment(Long commentId, UpdateCommentRequest request) {
+    // обновление комментария  
+}
+
+@Override  
+public void deleteComment(Long commentId) {
+    // удаление комментария  
+}
+}

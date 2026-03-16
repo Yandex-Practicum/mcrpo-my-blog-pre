@@ -1,181 +1,98 @@
-# 🎓 My Blog - Проект для студентов
 
-## 👋 Добро пожаловать!
 
-Это учебный проект для практики работы со **Spring Framework**.
+### 1. Подготовка окружения
 
-Вам предстоит **дописать недостающую функциональность** backend приложения-блога.
+Убедитесь, что у вас установлены:
+- **Java JDK 17** или выше.
+- **Maven** для управления зависимостями и сборкой проекта.
+- **MySQL** для работы с базой данных.
 
-**Репозиторий:** https://github.com/Yandex-Practicum/mcrpo-my-blog-pre
+### 2. Настройка базы данных
 
----
+Создайте базу данных, если вы этого еще не сделали:
 
-## 📚 С чего начать?
-
-### 0. Клонируйте проект
-
-```bash
-git clone https://github.com/Yandex-Practicum/mcrpo-my-blog-pre.git
-cd mcrpo-my-blog-pre
+```sql  
+CREATE DATABASE mydb;
 ```
 
-### 1. Прочитайте задание
+### 3. Настройка параметров подключения
 
-**Откройте файл:** [`ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md`](./ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md)
+В файле `application.properties` укажите правильные параметры подключения к вашей базе данных:
 
-В нём вы найдёте:
-- ✅ Описание задания
-- ✅ Пошаговые инструкции
-- ✅ Примеры кода
-- ✅ Критерии оценки
-- ✅ Процесс сдачи работы
-
-### 2. Найдите TODO в коде
-
-```bash
-grep -r "TODO:" src/
+```properties  
+spring.datasource.url=jdbc:mysql://localhost:3306/mydb  
+spring.datasource.username=your_username  
+spring.datasource.password=your_password  
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver  
 ```
 
-Или откройте [`TODO_TASKS.md`](./TODO_TASKS.md) для краткого списка задач.
+### 4. Сборка проекта
 
-### 3. Реализуйте функциональность
+В корневом каталоге вашего проекта выполните:
 
-Следуйте инструкциям в [`ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md`](./ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md).
-
-### 4. Соберите и проверьте
-
-```bash
-# Установить зависимости
-mvn clean install
-
-# Собрать проект
-mvn clean package
-
-# Запустить тесты
-mvn test
-
-# Развернуть на Tomcat
-cp target/*.war $CATALINA_HOME/webapps/ROOT.war
-catalina run
+```bash  
+mvn clean package  
 ```
 
----
+Эта команда соберет ваш проект и создаст JAR-файл в каталоге `target`.
 
-## 📁 Структура проекта
+### 5. Запуск тестов
 
-```
-mcrpo-my-blog-pre/
-├── src/main/java/com/myblog/
-│   ├── config/          # Spring конфигурация
-│   ├── controller/      # REST контроллеры (TODO здесь!)
-│   ├── service/         # Бизнес-логика (TODO здесь!)
-│   ├── dao/             # Работа с БД (TODO здесь!)
-│   ├── model/           # Модели данных
-│   └── dto/             # Data Transfer Objects
-├── src/test/           # Тесты (TODO: дописать)
-├── frontend/           # Frontend (React + Vite)
-├── pom.xml             # Maven конфигурация
-├── ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md  # 📖 НАЧНИТЕ ОТСЮДА!
-├── TODO_TASKS.md       # Краткий чек-лист
-└── README_СТУДЕНТЫ.md  # Техническая документация
+Для запуска тестов выполните команду:
+
+```bash  
+mvn test  
 ```
 
----
+Эта команда выполнит все тесты, которые вы написали для вашего приложения.
 
-## 🎯 Что нужно сделать
+### 6. Запуск приложения
 
-| Задание | Баллы |
-|---------|-------|
-| 1. Добавление и удаление лайков | 10 |
-| 2. Редактирование и удаление комментариев | 10 |
-| 3. Удаление поста (каскадное) | 5 |
-| 4. Unit-тесты (БОНУС) | +15 |
-| **ИТОГО** | **25-40** |
+После успешной сборки вы можете запустить приложение:
 
----
-
-## 🚀 Быстрый старт
-
-```bash
-# 1. Клонировать проект
-git clone https://github.com/Yandex-Practicum/mcrpo-my-blog-pre.git
-cd mcrpo-my-blog-pre
-
-# 2. Собрать backend
-mvn clean install
-
-# 3. Запустить backend (Jetty)
-mvn jetty:run -Dmaven.test.skip=true
-
-# Backend запустится на http://localhost:8080
-
-# 4. Запустить frontend (в другом терминале, опционально)
-# ⚠️ Требуется Node.js 18+ и npm
-# Установка: brew install node (macOS) или https://nodejs.org
-
-cd frontend
-npm install
-npm run dev
-
-# Frontend запустится на http://localhost:3000
-# Или тестируйте backend через curl/Postman
+```bash  
+java -jar target/my-blog-0.0.1-SNAPSHOT.jar  
 ```
 
----
+Если вы используете IDE, например IntelliJ IDEA, вы можете запустить класс `MyBlogApplication` напрямую.
 
-## 🛠 Технологии
+### 7. Проверка API
 
-- Java 17
-- Spring Framework 6.1+
-- Maven
-- H2 Database
-- JUnit 5 + Mockito
-- Tomcat 11
+Используйте Postman или curl для тестирования вашего API. Вот несколько примеров запросов:
 
----
+- Получение постов:
+  ```bash  
+  GET http://localhost:8080/posts?search=example&pageNumber=1&pageSize=10  
+  ```
 
-## 📖 Документация
+- Создание комментария:
+  ```bash  
+  POST http://localhost:8080/posts/1/comments  
+  Content-Type: application/json  
+  {
+      "text": "This is a comment",
+      "postId": 1  
+  }
+  ```
 
-- **[ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md](./ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md)** — полное описание задания
-- **[TODO_TASKS.md](./TODO_TASKS.md)** — краткий чек-лист
-- **[README_СТУДЕНТЫ.md](./README_СТУДЕНТЫ.md)** — техническая документация
+- Обновление комментария:
+  ```bash  
+  PUT http://localhost:8080/posts/1/comments/1  
+  Content-Type: application/json  
+  {
+      "text": "This is an updated comment"
+  }
+  ```
 
----
+- Удаление поста:
+  ```bash  
+  DELETE http://localhost:8080/posts/1  
+  ```
 
-## ❓ Часто задаваемые вопросы
+### 8. Логи и отладка
 
-### Как найти все TODO?
+Следите за выводом логов в консоли, чтобы отладить возможные проблемы. Убедитесь, что база данных запущена и параметры подключения настроены правильно.
 
-```bash
-grep -rn "TODO:" src/
-```
+### 9. Завершение
 
-### Как запустить только тесты?
-
-```bash
-mvn test
-```
-
-### Как проверить endpoint через curl?
-
-```bash
-curl http://localhost:8080/api/posts/1/likes -X POST
-```
-
-### Что делать, если застрял?
-
-1. Прочитайте существующий код — все TODO методы похожи на уже реализованные
-2. Читайте логи Tomcat — ошибки видны в консоли
-3. Смотрите БД через H2 консоль: http://localhost:8080/h2-console
-
----
-
-## 🎓 Успехов!
-
-**Помните:** Цель не просто сделать, а **научиться**!
-
-Изучайте существующий код, экспериментируйте, задавайте вопросы.
-
----
-
-**Удачи! 🚀**
+Теперь ваше приложение готово к работе. Вы можете взаимодействовать с API и добавлять дополнительные функции по мере необходимости. Если у вас есть вопросы по коду или возникли проблемы, не стесняйтесь спрашивать!
