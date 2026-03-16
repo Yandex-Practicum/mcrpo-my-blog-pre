@@ -26,7 +26,7 @@ import com.myblog.model.Post;
 import com.myblog.service.PostService;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 public class PostController {
 
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
@@ -38,9 +38,9 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<PostListResponse> getPosts(
-            @RequestParam(required = true) String search,
-            @RequestParam(required = true) int pageNumber,
-            @RequestParam(required = true) int pageSize) {
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
         
         log.debug("GET /api/posts - search: {}, pageNumber: {}, pageSize: {}", search, pageNumber, pageSize);
         PostListResponse response = postService.getPosts(search, pageNumber, pageSize);
