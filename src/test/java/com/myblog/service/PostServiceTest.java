@@ -45,15 +45,12 @@ class PostServiceTest {
 
     @Test
     void testGetPosts() {
-        // Given
         List<Post> posts = Arrays.asList(testPost);
         when(postDao.findAll(anyString(), anyInt(), anyInt())).thenReturn(posts);
         when(postDao.getTotalCount(anyString())).thenReturn(1);
 
-        // When
         PostListResponse response = postService.getPosts("", 1, 10);
 
-        // Then
         assertNotNull(response);
         assertEquals(1, response.getPosts().size());
         assertEquals(testPost.getId(), response.getPosts().get(0).getId());
@@ -67,13 +64,10 @@ class PostServiceTest {
 
     @Test
     void testGetPostById() {
-        // Given
         when(postDao.findById(1L)).thenReturn(Optional.of(testPost));
 
-        // When
         Optional<Post> result = postService.getPostById(1L);
 
-        // Then
         assertTrue(result.isPresent());
         assertEquals(testPost.getId(), result.get().getId());
         assertEquals(testPost.getTitle(), result.get().getTitle());
@@ -83,7 +77,6 @@ class PostServiceTest {
 
     @Test
     void testCreatePost() {
-        // Given
         CreatePostRequest request = new CreatePostRequest();
         request.setTitle("New Post");
         request.setText("New content");
@@ -91,10 +84,8 @@ class PostServiceTest {
         
         when(postDao.create(any(Post.class))).thenReturn(testPost);
 
-        // When
         Post result = postService.createPost(request);
 
-        // Then
         assertNotNull(result);
         assertEquals(testPost.getId(), result.getId());
         
@@ -103,7 +94,6 @@ class PostServiceTest {
 
     @Test
     void testUpdatePost() {
-        // Given
         UpdatePostRequest request = new UpdatePostRequest();
         request.setId(1L);
         request.setTitle("Updated Post");
@@ -113,10 +103,8 @@ class PostServiceTest {
         when(postDao.findById(1L)).thenReturn(Optional.of(testPost));
         when(postDao.update(any(Post.class))).thenReturn(testPost);
 
-        // When
         Post result = postService.updatePost(1L, request);
 
-        // Then
         assertNotNull(result);
         
         verify(postDao).findById(1L);
@@ -125,7 +113,6 @@ class PostServiceTest {
 
     @Test
     void testUpdatePostNotFound() {
-        // Given
         UpdatePostRequest request = new UpdatePostRequest();
         request.setId(999L);
         request.setTitle("Updated Post");
@@ -134,7 +121,6 @@ class PostServiceTest {
         
         when(postDao.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
             postService.updatePost(999L, request);
         });
@@ -145,16 +131,13 @@ class PostServiceTest {
 
     @Test
     void testDeletePost() {
-        // When
         postService.deletePost(1L);
 
-        // Then
         verify(postDao).delete(1L);
     }
 
     @Test
     void testIncrementLikes() {
-        // Given
         Post likedPost = new Post();
         likedPost.setId(1L);
         likedPost.setTitle("Test Post");
@@ -164,14 +147,43 @@ class PostServiceTest {
         
         when(postDao.findById(1L)).thenReturn(Optional.of(likedPost));
 
-        // When
         int likesCount = postService.incrementLikes(1L);
 
-        // Then
         assertEquals(5, likesCount);
         
         verify(postDao).incrementLikes(1L);
         verify(postDao).findById(1L);
+    }
+
+    @Test
+    void testDecrementLikes() {
+        Post likedPost = new Post();
+        likedPost.setId(1L);
+        likedPost.setTitle("Test Post");
+        likedPost.setText("Test content");
+        likedPost.setLikesCount(3);
+        likedPost.setCommentsCount(0);
+        
+        when(postDao.findById(1L)).thenReturn(Optional.of(likedPost));
+
+        int likesCount = postService.decrementLikes(1L);
+
+        assertEquals(3, likesCount);
+        
+        verify(postDao).decrementLikes(1L);
+        verify(postDao).findById(1L);
+    }
+
+    @Test
+    void testDecrementLikesReturnsZeroWhenPostNotFound() {
+        when(postDao.findById(999L)).thenReturn(Optional.empty());
+
+        int likesCount = postService.decrementLikes(999L);
+
+        assertEquals(0, likesCount);
+        
+        verify(postDao).decrementLikes(999L);
+        verify(postDao).findById(999L);
     }
 }
 

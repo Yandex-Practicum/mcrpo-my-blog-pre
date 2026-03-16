@@ -188,5 +188,68 @@ class PostControllerIntegrationTest {
             .andExpect(status().isOk())
             .andExpect(content().string("2"));
     }
+
+    @Test
+    void testDecrementLikes() throws Exception {
+        // Create a post first
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Post with Likes");
+        request.setText("Content");
+        request.setTags(Arrays.asList());
+
+        String response = mockMvc.perform(post("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isCreated())
+            .andReturn().getResponse().getContentAsString();
+
+        Long postId = objectMapper.readTree(response).get("id").asLong();
+
+        // Increment likes to 3
+        mockMvc.perform(post("/api/posts/" + postId + "/likes"))
+            .andExpect(status().isOk());
+        mockMvc.perform(post("/api/posts/" + postId + "/likes"))
+            .andExpect(status().isOk());
+        mockMvc.perform(post("/api/posts/" + postId + "/likes"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("3"));
+
+        // Decrement likes
+        mockMvc.perform(delete("/api/posts/" + postId + "/likes"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("2"));
+
+        // Decrement again
+        mockMvc.perform(delete("/api/posts/" + postId + "/likes"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("1"));
+    }
+
+    @Test
+    void testDecrementLikesNotBelowZero() throws Exception {
+        // Create a post first
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Post with Likes");
+        request.setText("Content");
+        request.setTags(Arrays.asList());
+
+        String response = mockMvc.perform(post("/api/posts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isCreated())
+            .andReturn().getResponse().getContentAsString();
+
+        Long postId = objectMapper.readTree(response).get("id").asLong();
+
+        // Try to decrement when it's already 0
+        mockMvc.perform(delete("/api/posts/" + postId + "/likes"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("0"));
+
+        // Verify it stays 0
+        mockMvc.perform(delete("/api/posts/" + postId + "/likes"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("0"));
+    }
 }
 

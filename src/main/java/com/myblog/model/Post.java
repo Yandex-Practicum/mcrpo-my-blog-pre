@@ -32,7 +32,6 @@ public class Post {
         this.commentsCount = commentsCount;
     }
 
-    // Getters
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getText() { return text; }
@@ -42,7 +41,6 @@ public class Post {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
-    // Setters
     public void setId(Long id) { this.id = id; }
     public void setTitle(String title) { this.title = title; }
     public void setText(String text) { this.text = text; }
