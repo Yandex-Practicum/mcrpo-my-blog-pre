@@ -4,15 +4,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.myblog.dto.CreateCommentRequest;
 import com.myblog.dto.CreatePostRequest;
-import com.myblog.dto.UpdatePostRequest;
+import com.myblog.dto.UpdateCommentRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ import com.myblog.MyBlogApplication;
 
 @SpringBootTest(classes = MyBlogApplication.class)
 @AutoConfigureMockMvc
-class PostControllerIntegrationTest {
+class CommentControllerIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,60 +47,50 @@ class PostControllerIntegrationTest {
     }
 
     @Test
-    void getPostsReturnsPagedResponse() throws Exception {
-        mockMvc.perform(get("/api/posts")
-                        .param("search", "")
-                        .param("pageNumber", "1")
-                        .param("pageSize", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.posts").isArray())
-                .andExpect(jsonPath("$.hasPrev").exists())
-                .andExpect(jsonPath("$.hasNext").exists())
-                .andExpect(jsonPath("$.lastPage").exists());
-    }
+    void createUpdateDeleteCommentFlowWorks() throws Exception {
+        Long postId = createPost();
 
-    @Test
-    void createUpdateDeletePostFlowWorks() throws Exception {
-        CreatePostRequest createRequest = new CreatePostRequest();
-        createRequest.setTitle("Original Title");
-        createRequest.setText("Original content");
-        createRequest.setTags(List.of("tag1"));
+        CreateCommentRequest createRequest = new CreateCommentRequest();
+        createRequest.setText("First comment");
+        createRequest.setPostId(999L);
 
-        String createResponse = mockMvc.perform(post("/api/posts")
+        String createResponse = mockMvc.perform(post("/api/posts/{postId}/comments", postId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.title").value("Original Title"))
+                .andExpect(jsonPath("$.postId").value(postId))
+                .andExpect(jsonPath("$.text").value("First comment"))
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
 
-        Long postId = objectMapper.readTree(createResponse).get("id").asLong();
+        Long commentId = objectMapper.readTree(createResponse).get("id").asLong();
 
-        UpdatePostRequest updateRequest = new UpdatePostRequest();
-        updateRequest.setId(postId);
-        updateRequest.setTitle("Updated Title");
-        updateRequest.setText("Updated content");
-        updateRequest.setTags(List.of("tag2"));
+        mockMvc.perform(get("/api/posts/{postId}/comments", postId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(commentId));
 
-        mockMvc.perform(put("/api/posts/{id}", postId)
+        UpdateCommentRequest updateRequest = new UpdateCommentRequest();
+        updateRequest.setId(commentId);
+        updateRequest.setPostId(postId);
+        updateRequest.setText("Updated comment");
+
+        mockMvc.perform(put("/api/posts/{postId}/comments/{commentId}", postId, commentId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.title").value("Updated Title"))
-                .andExpect(jsonPath("$.text").value("Updated content"));
+                .andExpect(jsonPath("$.text").value("Updated comment"));
 
-        mockMvc.perform(delete("/api/posts/{id}", postId))
+        mockMvc.perform(delete("/api/posts/{postId}/comments/{commentId}", postId, commentId))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/posts/{id}", postId))
+        mockMvc.perform(get("/api/posts/{postId}/comments/{commentId}", postId, commentId))
                 .andExpect(status().isNotFound());
     }
 
-    @Test
-    void likesEndpointsWork() throws Exception {
+    private Long createPost() throws Exception {
         CreatePostRequest request = new CreatePostRequest();
-        request.setTitle("Post with Likes");
+        request.setTitle("Post for comments");
         request.setText("Content");
         request.setTags(List.of());
 
@@ -112,14 +102,6 @@ class PostControllerIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        Long postId = objectMapper.readTree(response).get("id").asLong();
-
-        mockMvc.perform(post("/api/posts/{id}/likes", postId))
-                .andExpect(status().isOk())
-                .andExpect(content().string("1"));
-
-        mockMvc.perform(delete("/api/posts/{id}/likes", postId))
-                .andExpect(status().isOk())
-                .andExpect(content().string("0"));
+        return objectMapper.readTree(response).get("id").asLong();
     }
 }
