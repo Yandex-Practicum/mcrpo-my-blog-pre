@@ -22,7 +22,7 @@ import com.myblog.model.Comment;
 import com.myblog.service.CommentService;
 
 @RestController
-@RequestMapping("/posts/{postId}/comments")
+@RequestMapping("/api/posts/{postId}/comments")
 public class CommentController {
 
     private static final Logger log = LoggerFactory.getLogger(CommentController.class);
@@ -56,6 +56,7 @@ public class CommentController {
             @RequestBody CreateCommentRequest request) {
         
         log.debug("POST /api/posts/{}/comments - text: {}", postId, request.getText());
+        request.setPostId(postId);
         Comment createdComment = commentService.createComment(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(createdComment);
     }
