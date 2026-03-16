@@ -11,11 +11,9 @@ public class CreateCommentRequest {
         this.postId = postId;
     }
 
-    // Getters
     public String getText() { return text; }
     public Long getPostId() { return postId; }
 
-    // Setters
     public void setText(String text) { this.text = text; }
     public void setPostId(Long postId) { this.postId = postId; }
 }

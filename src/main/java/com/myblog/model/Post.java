@@ -1,9 +1,10 @@
 package com.myblog.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class Post {
     private Long id;
@@ -12,10 +13,10 @@ public class Post {
     private List<String> tags;
     private Integer likesCount;
     private Integer commentsCount;
-    
+
     @JsonIgnore
     private LocalDateTime createdAt;
-    
+
     @JsonIgnore
     private LocalDateTime updatedAt;
 
@@ -32,7 +33,6 @@ public class Post {
         this.commentsCount = commentsCount;
     }
 
-    // Getters
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public String getText() { return text; }
@@ -42,7 +42,6 @@ public class Post {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
-    // Setters
     public void setId(Long id) { this.id = id; }
     public void setTitle(String title) { this.title = title; }
     public void setText(String text) { this.text = text; }
