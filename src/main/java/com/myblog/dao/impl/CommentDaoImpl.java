@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,6 +19,9 @@ import java.util.Optional;
 
 @Repository
 public class CommentDaoImpl implements CommentDao {
+	
+    @Autowired  
+    private JdbcTemplate jdbcTemplate;
 
     private static final Logger log = LoggerFactory.getLogger(CommentDaoImpl.class);
     private final JdbcTemplate jdbcTemplate;
@@ -44,16 +48,8 @@ public class CommentDaoImpl implements CommentDao {
         return findById(commentId).orElse(comment);
     }
 
-    @Override
-    public Optional<Comment> findById(Long id) {
-        String sql = "SELECT id, text, post_id, created_at, updated_at FROM comments WHERE id = ?";
-        try {
-            Comment comment = jdbcTemplate.queryForObject(sql, new CommentRowMapper(), id);
-            return Optional.ofNullable(comment);
-        } catch (Exception e) {
-            log.debug("Comment not found with id: {}", id);
-            return Optional.empty();
-        }
+    @Override  
+    public Comment findById(Long id) { 
     }
 
     @Override
@@ -71,13 +67,10 @@ public class CommentDaoImpl implements CommentDao {
         throw new UnsupportedOperationException("TODO: Implement update");
     }
 
-    @Override
-    public void delete(Long id) {
-        // TODO: Реализовать удаление комментария
-        // Выполнить SQL DELETE: DELETE FROM comments WHERE id = ?
-        // Пример: String sql = "DELETE FROM comments WHERE id = ?";
-        throw new UnsupportedOperationException("TODO: Implement delete");
+    @Override  
+    public void delete(Long id) {  
     }
+}
 
     @Override
     public int countByPostId(Long postId) {

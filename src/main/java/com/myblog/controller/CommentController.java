@@ -9,9 +9,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Optional;
+
+@Autowired  
+private CommentService commentService;
 
 @RestController
 @RequestMapping("/posts/{postId}/comments")
@@ -63,18 +67,19 @@ public class CommentController {
         // 2. Обработать исключение IllegalArgumentException -> вернуть 404
         // 3. При успехе вернуть ResponseEntity.ok(updatedComment)
         // Подсказка: посмотрите на PostController.updatePost как пример
-        throw new UnsupportedOperationException("TODO: Implement updateComment");
+        Comment updatedComment = commentService.updateComment(commentId, request);
+        return ResponseEntity.ok(updatedComment);
     }
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<Void> deleteComment(
             @PathVariable Long postId,
             @PathVariable Long commentId) {
-        
+        commentService.deleteComment(commentId);
         // TODO: Реализовать удаление комментария
         // 1. Вызвать commentService.deleteComment(commentId)
         // 2. Вернуть ResponseEntity.ok().build()
-        throw new UnsupportedOperationException("TODO: Implement deleteComment");
+        return ResponseEntity.ok().build();
     }
 }
 
