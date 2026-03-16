@@ -18,13 +18,11 @@ public class PostListResponse {
         this.lastPage = lastPage;
     }
 
-    // Getters
     public List<Post> getPosts() { return posts; }
     public boolean isHasPrev() { return hasPrev; }
     public boolean isHasNext() { return hasNext; }
     public int getLastPage() { return lastPage; }
 
-    // Setters
     public void setPosts(List<Post> posts) { this.posts = posts; }
     public void setHasPrev(boolean hasPrev) { this.hasPrev = hasPrev; }
     public void setHasNext(boolean hasNext) { this.hasNext = hasNext; }

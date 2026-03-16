@@ -22,14 +22,12 @@ public class Comment {
         this.postId = postId;
     }
 
-    // Getters
     public Long getId() { return id; }
     public String getText() { return text; }
     public Long getPostId() { return postId; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
-    // Setters
     public void setId(Long id) { this.id = id; }
     public void setText(String text) { this.text = text; }
     public void setPostId(Long postId) { this.postId = postId; }
