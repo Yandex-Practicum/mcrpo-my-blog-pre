@@ -54,7 +54,7 @@ class PostDaoIntegrationTest {
         assertNotNull(createdPost.getId());
         assertEquals("Test Post", createdPost.getTitle());
         assertEquals(0, createdPost.getLikesCount());
-        
+
         Optional<Post> foundPost = postDao.findById(createdPost.getId());
         assertTrue(foundPost.isPresent());
         assertEquals(createdPost.getId(), foundPost.get().getId());
@@ -194,13 +194,13 @@ class PostDaoIntegrationTest {
         post1.setText("Content");
         post1.setTags(Arrays.asList());
         postDao.create(post1);
-        
+
         Post post2 = new Post();
         post2.setTitle("Post 2");
         post2.setText("Content");
         post2.setTags(Arrays.asList());
         postDao.create(post2);
-        
+
         Post post3 = new Post();
         post3.setTitle("Post 3");
         post3.setText("Content");
