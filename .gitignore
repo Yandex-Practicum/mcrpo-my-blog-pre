@@ -1,36 +1,30 @@
-# Java
-*.class
-*.jar
-*.war
-*.ear
+# Compiled files
 target/
-*.log
-
-# Maven
-.mvn/
-mvnw
-mvnw.cmd
-
-# Node
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-dist/
-build/
+*.class
 
 # IDE
 .idea/
 *.iml
 .vscode/
-*.swp
-*.swo
-*~
+.settings/
+.project
+.classpath
+.factorypath
+.springBeans
+
+# Logs
+logs/
+*.log
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Environment
-.env
-.env.local
+# Application
+*.jar
+*.war
+application-local.properties
+application-dev.properties
+
+# Test reports
+test-output/
