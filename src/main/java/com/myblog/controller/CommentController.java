@@ -15,7 +15,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/posts/{postId}/comments")
-@CrossOrigin(origins = "http://localhost:5173")
 public class CommentController {
 
     private static final Logger log = LoggerFactory.getLogger(CommentController.class);
