@@ -1,23 +1,32 @@
 package com.myblog.controller;
 
-import com.myblog.dto.CreatePostRequest;
-import com.myblog.dto.PostListResponse;
-import com.myblog.dto.UpdatePostRequest;
-import com.myblog.model.Post;
-import com.myblog.service.PostService;
+import java.io.IOException;
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.Optional;
+import com.myblog.dto.CreatePostRequest;
+import com.myblog.dto.PostListResponse;
+import com.myblog.dto.UpdatePostRequest;
+import com.myblog.model.Post;
+import com.myblog.service.PostService;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 public class PostController {
 
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
@@ -29,9 +38,9 @@ public class PostController {
 
     @GetMapping
     public ResponseEntity<PostListResponse> getPosts(
-            @RequestParam(required = true) String search,
-            @RequestParam(required = true) int pageNumber,
-            @RequestParam(required = true) int pageSize) {
+            @RequestParam(defaultValue = "") String search,
+            @RequestParam(defaultValue = "1") int pageNumber,
+            @RequestParam(defaultValue = "10") int pageSize) {
         
         log.debug("GET /api/posts - search: {}, pageNumber: {}, pageSize: {}", search, pageNumber, pageSize);
         PostListResponse response = postService.getPosts(search, pageNumber, pageSize);
@@ -66,38 +75,32 @@ public class PostController {
             @PathVariable Long id,
             @RequestBody UpdatePostRequest request) {
         
-        log.debug("PUT /api/posts/{} - title: {}", id, request.getTitle());
+        log.debug("PUT /api/posts/{} - title: {}", id, request.getTitle());        
         
-        try {
-            Post updatedPost = postService.updatePost(id, request);
-            return ResponseEntity.ok(updatedPost);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Post updatedPost = postService.updatePost(id, request);
+        return ResponseEntity.ok(updatedPost);        
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postService.deletePost(id)
-        // 2. Вернуть ResponseEntity.ok().build()
-        // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+    public ResponseEntity<Void> deletePost(@PathVariable Long id) {        
+        postService.deletePost(id);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/likes")
     public ResponseEntity<Integer> incrementLikes(@PathVariable Long id) {
         log.debug("POST /api/posts/{}/likes", id);
+        
         int likesCount = postService.incrementLikes(id);
         return ResponseEntity.ok(likesCount);
     }
 
     @DeleteMapping("/{id}/likes")
-    public ResponseEntity<Integer> removeLike(@PathVariable Long id) {
-        // TODO: Реализовать удаление лайка
-        // 1. Вызвать postService.decrementLikes(id)
-        // 2. Вернуть ResponseEntity.ok() с новым количеством лайков
-        throw new UnsupportedOperationException("TODO: Implement removeLike");
+    public ResponseEntity<Integer> removeLike(@PathVariable Long id) {    
+        log.debug("DELETE /api/posts/{}/likes", id);        
+
+        int likesCount = postService.decrementLikes(id);
+        return ResponseEntity.ok(likesCount);       
     }
 
     @PutMapping("/{id}/image")
