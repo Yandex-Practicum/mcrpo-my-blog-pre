@@ -17,15 +17,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import java.util.List;
 
 @Configuration
-@EnableWebMvc
-@ComponentScan(
-    basePackages = "com.myblog.controller",
-    includeFilters = {
-        @ComponentScan.Filter(Controller.class),
-        @ComponentScan.Filter(RestController.class)
-    },
-    useDefaultFilters = false
-)
 public class WebConfig implements WebMvcConfigurer {
 
     @Override

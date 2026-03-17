@@ -10,54 +10,72 @@
 
 ---
 
-## 📚 С чего начать?
+## 📚 Сборка и запуск backend (Spring Boot)
 
-### 0. Клонируйте проект
+### 0. Требования
+
+- **Java 17+**
+- **Maven 3.9+**
+
+### 1. Клонируйте проект
 
 ```bash
 git clone https://github.com/Yandex-Practicum/mcrpo-my-blog-pre.git
 cd mcrpo-my-blog-pre
 ```
 
-### 1. Прочитайте задание
+Убедитесь, что вы на ветке с итоговой работой (например, `feature/spring-boot-migration`).
 
-**Откройте файл:** [`ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md`](./ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md)
-
-В нём вы найдёте:
-- ✅ Описание задания
-- ✅ Пошаговые инструкции
-- ✅ Примеры кода
-- ✅ Критерии оценки
-- ✅ Процесс сдачи работы
-
-### 2. Найдите TODO в коде
+### 2. Сборка backend
 
 ```bash
-grep -r "TODO:" src/
-```
-
-Или откройте [`TODO_TASKS.md`](./TODO_TASKS.md) для краткого списка задач.
-
-### 3. Реализуйте функциональность
-
-Следуйте инструкциям в [`ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md`](./ЗАДАНИЕ_ДЛЯ_СТУДЕНТОВ.md).
-
-### 4. Соберите и проверьте
-
-```bash
-# Установить зависимости
-mvn clean install
-
-# Собрать проект
 mvn clean package
-
-# Запустить тесты
-mvn test
-
-# Развернуть на Tomcat
-cp target/*.war $CATALINA_HOME/webapps/ROOT.war
-catalina run
 ```
+
+В результате будет собран **исполняемый Jar**:
+
+- `target/my-blog-back-app-1.0.0.jar`
+
+### 3. Запуск тестов
+
+```bash
+mvn test
+```
+
+Тесты используют **Spring Boot Test** и поднимают встроенный контекст приложения и H2-базу.
+
+### 4. Запуск приложения
+
+```bash
+java -jar target/my-blog-back-app-1.0.0.jar
+```
+
+По умолчанию приложение стартует во **встроенном Tomcat** на:
+
+- `http://localhost:8080`
+
+Параметры подключения к H2 находятся в `src/main/resources/application.properties`. Структура БД создаётся автоматически из `schema.sql` при старте.
+
+### 5. Основные endpoints backend
+
+Базовый URL: `http://localhost:8080`
+
+- **Посты**
+  - `GET /posts?search=&pageNumber=1&pageSize=10` — список постов с пагинацией и поиском.
+  - `GET /posts/{id}` — получить пост по id.
+  - `POST /posts` — создать пост.
+  - `PUT /posts/{id}` — обновить пост.
+  - `DELETE /posts/{id}` — удалить пост (каскадно удаляются комментарии, теги-связи и изображение).
+  - `POST /posts/{id}/likes` — поставить лайк посту.
+  - `DELETE /posts/{id}/likes` — убрать лайк поста.
+  - `PUT /posts/{id}/image` — загрузить картинку для поста (multipart/form-data).
+  - `GET /posts/{id}/image` — получить картинку поста.
+
+- **Комментарии**
+  - `GET /comments?postId={postId}` — список комментариев к посту.
+  - `POST /comments` — создать комментарий.
+  - `PUT /comments/{id}` — обновить комментарий.
+  - `DELETE /comments/{id}` — удалить комментарий.
 
 ---
 
