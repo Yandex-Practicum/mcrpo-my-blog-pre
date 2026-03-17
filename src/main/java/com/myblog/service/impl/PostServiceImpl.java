@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service  
 public class PostServiceImpl implements PostService {
 
     private static final Logger log = LoggerFactory.getLogger(PostServiceImpl.class);
@@ -24,7 +24,7 @@ public class PostServiceImpl implements PostService {
         this.postDao = postDao;
     }
 
-    @Override
+    @Override  
     @Transactional(readOnly = true)
     public PostListResponse getPosts(String search, int pageNumber, int pageSize) {
         log.debug("Getting posts with search: {}, page: {}, size: {}", search, pageNumber, pageSize);
@@ -36,15 +36,15 @@ public class PostServiceImpl implements PostService {
         return new PostListResponse(posts, pageNumber > 1, pageNumber < lastPage, lastPage);
     }
 
-    @Override
+    @Override  
     @Transactional(readOnly = true)
     public Optional<Post> getPostById(Long id) {
         log.debug("Getting post by id: {}", id);
         return postDao.findById(id);
     }
 
-    @Override
-    @Transactional
+    @Override  
+    @Transactional  
     public Post createPost(CreatePostRequest request) {
         log.debug("Creating new post with title: {}", request.getTitle());
         
@@ -52,21 +52,20 @@ public class PostServiceImpl implements PostService {
         post.setTitle(request.getTitle());
         post.setText(request.getText());
         post.setTags(request.getTags());
-        
+
+        // Сохраняем пост через DAO  
         return postDao.create(post);
     }
 
-    @Override
-    @Transactional
+    @Override  
+    @Transactional  
     public Post updatePost(Long id, UpdatePostRequest request) {
         log.debug("Updating post with id: {}", id);
         
-        Optional<Post> existingPost = postDao.findById(id);
-        if (existingPost.isEmpty()) {
-            throw new IllegalArgumentException("Post not found with id: " + id);
-        }
+        Post post = postDao.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + id));
         
-        Post post = existingPost.get();
+        // Обновляем поля поста  
         post.setTitle(request.getTitle());
         post.setText(request.getText());
         post.setTags(request.getTags());
@@ -74,54 +73,53 @@ public class PostServiceImpl implements PostService {
         return postDao.update(post);
     }
 
-    @Override
-    @Transactional
+    @Override  
+    @Transactional  
     public void deletePost(Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postDao.delete(id)
-        // ВАЖНО: Метод уже помечен @Transactional - это обеспечит атомарность каскадного удаления
-        // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+        log.debug("Deleting post with id: {}", id);
+        postDao.delete(id);
     }
 
-    @Override
-    @Transactional
+    @Override  
+    @Transactional  
     public int incrementLikes(Long id) {
         log.debug("Incrementing likes for post with id: {}", id);
         postDao.incrementLikes(id);
         
-        Optional<Post> post = postDao.findById(id);
-        return post.map(Post::getLikesCount).orElse(0);
+        return postDao.findById(id)
+                .map(Post::getLikesCount)
+                .orElse(0);
     }
 
-    @Override
-    @Transactional
+    @Override  
+    @Transactional  
     public int decrementLikes(Long id) {
-        // TODO: Реализовать уменьшение лайков
-        // 1. Вызвать postDao.decrementLikes(id)
-        // 2. Получить обновлённый пост через postDao.findById(id)
-        // 3. Вернуть новое значение likesCount
-        throw new UnsupportedOperationException("TODO: Implement decrementLikes");
+        log.debug("Decrementing likes for post with id: {}", id);
+        postDao.decrementLikes(id);
+        
+        return postDao.findById(id)
+                .map(Post::getLikesCount)
+                .orElseThrow(() -> new RuntimeException("Post not found with id: " + id));
     }
 
-    @Override
-    @Transactional
+    @Override  
+    @Transactional  
     public void saveImage(Long postId, byte[] imageData, String contentType) {
         log.debug("Saving image for post with id: {}", postId);
         postDao.saveImage(postId, imageData, contentType);
     }
 
-    @Override
+    @Override  
     @Transactional(readOnly = true)
     public Optional<byte[]> getImage(Long postId) {
         log.debug("Getting image for post with id: {}", postId);
         return postDao.getImage(postId);
     }
 
-    @Override
+    @Override  
     @Transactional(readOnly = true)
     public Optional<String> getImageContentType(Long postId) {
+        log.debug("Getting image content type for post with id: {}", postId);
         return postDao.getImageContentType(postId);
     }
 }
-
