@@ -52,7 +52,7 @@ class CommentServiceTest {
         assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals(testComment.getId(), result.get(0).getId());
-        
+
         verify(commentDao).findByPostId(1L);
     }
 
@@ -67,7 +67,7 @@ class CommentServiceTest {
         // Then
         assertTrue(result.isPresent());
         assertEquals(testComment.getId(), result.get().getId());
-        
+
         verify(commentDao).findById(1L);
     }
 
@@ -77,7 +77,7 @@ class CommentServiceTest {
         CreateCommentRequest request = new CreateCommentRequest();
         request.setText("New comment");
         request.setPostId(1L);
-        
+
         when(commentDao.create(any(Comment.class))).thenReturn(testComment);
 
         // When
@@ -86,7 +86,7 @@ class CommentServiceTest {
         // Then
         assertNotNull(result);
         assertEquals(testComment.getId(), result.getId());
-        
+
         verify(commentDao).create(any(Comment.class));
     }
 
@@ -97,7 +97,7 @@ class CommentServiceTest {
         request.setId(1L);
         request.setText("Updated comment");
         request.setPostId(1L);
-        
+
         when(commentDao.findById(1L)).thenReturn(Optional.of(testComment));
         when(commentDao.update(any(Comment.class))).thenReturn(testComment);
 
@@ -106,7 +106,7 @@ class CommentServiceTest {
 
         // Then
         assertNotNull(result);
-        
+
         verify(commentDao).findById(1L);
         verify(commentDao).update(any(Comment.class));
     }
@@ -118,14 +118,14 @@ class CommentServiceTest {
         request.setId(999L);
         request.setText("Updated comment");
         request.setPostId(1L);
-        
+
         when(commentDao.findById(999L)).thenReturn(Optional.empty());
 
         // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
             commentService.updateComment(999L, request);
         });
-        
+
         verify(commentDao).findById(999L);
         verify(commentDao, never()).update(any(Comment.class));
     }

@@ -1,25 +1,25 @@
 package com.myblog.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+
 public class UpdateCommentRequest {
-    private Long id;
+    @NotBlank(message = "Comment text cannot be empty")
+    @Size(max = 1000, message = "Comment text cannot exceed 1000 characters")
     private String text;
-    private Long postId;
 
-    public UpdateCommentRequest() {}
-
-    public UpdateCommentRequest(Long id, String text, Long postId) {
-        this.id = id;
-        this.text = text;
-        this.postId = postId;
+    // getters and setters
+    public String getText() {
+        return text;
     }
 
-    // Getters
-    public Long getId() { return id; }
-    public String getText() { return text; }
-    public Long getPostId() { return postId; }
-
-    // Setters
-    public void setId(Long id) { this.id = id; }
-    public void setText(String text) { this.text = text; }
-    public void setPostId(Long postId) { this.postId = postId; }
+    public void setText(String text) {
+        this.text = text;
+    }
 }
