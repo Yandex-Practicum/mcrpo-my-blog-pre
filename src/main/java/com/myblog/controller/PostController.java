@@ -26,7 +26,7 @@ public class PostController {
     public PostController(PostService postService) {
         this.postService = postService;
     }
-
+    
     @GetMapping
     public ResponseEntity<PostListResponse> getPosts(
             @RequestParam(required = true) String search,
