@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 public class PostController {
 
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
