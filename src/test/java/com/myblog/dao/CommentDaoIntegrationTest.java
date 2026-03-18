@@ -1,18 +1,12 @@
 package com.myblog.dao;
 
-import com.myblog.config.DatabaseConfig;
-import com.myblog.dao.impl.CommentDaoImpl;
-import com.myblog.dao.impl.PostDaoImpl;
-import com.myblog.dao.impl.TagDaoImpl;
 import com.myblog.model.Comment;
 import com.myblog.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -20,19 +14,18 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DatabaseConfig.class, CommentDaoImpl.class, PostDaoImpl.class, TagDaoImpl.class})
+@SpringBootTest
 @Transactional
 class CommentDaoIntegrationTest {
 
     @Autowired
+    private CommentDao commentDao;
+
+    @Autowired
+    private PostDao postDao;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private CommentDaoImpl commentDao;
-
-    @Autowired
-    private PostDaoImpl postDao;
 
     @BeforeEach
     void setUp() {

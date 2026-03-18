@@ -1,53 +1,37 @@
 package com.myblog.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.myblog.dto.CreateCommentRequest;
 import com.myblog.dto.CreatePostRequest;
 import com.myblog.dto.UpdateCommentRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {com.myblog.config.RootConfig.class, com.myblog.config.WebConfig.class, com.myblog.config.DatabaseConfig.class})
-@WebAppConfiguration
-@Transactional
+@SpringBootTest
+@AutoConfigureMockMvc
 class CommentControllerIntegrationTest {
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     private MockMvc mockMvc;
+
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         objectMapper = new ObjectMapper();
-        
-        jdbcTemplate.execute("DELETE FROM post_images");
-        jdbcTemplate.execute("DELETE FROM post_tags");
-        jdbcTemplate.execute("DELETE FROM comments");
-        jdbcTemplate.execute("DELETE FROM tags");
-        jdbcTemplate.execute("DELETE FROM posts");
     }
 
     @Test
@@ -121,5 +105,109 @@ class CommentControllerIntegrationTest {
 
         mockMvc.perform(delete("/posts/" + postId + "/comments/" + commentId))
             .andExpect(status().isOk());
+    }
+
+    @Test
+    @Transactional
+    void shouldUsePostIdFromPathWhenCreatingComment() throws Exception {
+        String postJson = """
+            {
+              "title": "Post for comment path test",
+              "text": "Body",
+              "tags": ["test"]
+            }
+            """;
+
+        String createdPostResponse = mockMvc.perform(post("/posts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(postJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode postNode = objectMapper.readTree(createdPostResponse);
+        long postId = postNode.get("id").asLong();
+
+        String commentJson = """
+            {
+              "postId": 999999,
+              "text": "Comment with wrong body postId"
+            }
+            """;
+
+        String createdCommentResponse = mockMvc.perform(post("/posts/{postId}/comments", postId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(commentJson))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        JsonNode commentNode = objectMapper.readTree(createdCommentResponse);
+        assertThat(commentNode.get("postId").asLong()).isEqualTo(postId);
+    }
+
+    @Test
+    @Transactional
+    void shouldReturnNotFoundWhenCommentDoesNotBelongToPost() throws Exception {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        String firstPostJson = """
+            {
+              "title": "First post",
+              "text": "Body 1",
+              "tags": ["one"]
+            }
+            """;
+
+        String secondPostJson = """
+            {
+              "title": "Second post",
+              "text": "Body 2",
+              "tags": ["two"]
+            }
+            """;
+
+        long firstPostId = objectMapper.readTree(
+                mockMvc.perform(post("/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(firstPostJson))
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString()
+        ).get("id").asLong();
+
+        long secondPostId = objectMapper.readTree(
+                mockMvc.perform(post("/posts")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(secondPostJson))
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString()
+        ).get("id").asLong();
+
+        String commentJson = """
+            {
+              "postId": %d,
+              "text": "Comment for first post"
+            }
+            """.formatted(firstPostId);
+
+        long commentId = objectMapper.readTree(
+                mockMvc.perform(post("/posts/{postId}/comments", firstPostId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(commentJson))
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString()
+        ).get("id").asLong();
+
+        mockMvc.perform(get("/posts/{postId}/comments/{commentId}", secondPostId, commentId))
+                .andExpect(status().isNotFound());
     }
 }

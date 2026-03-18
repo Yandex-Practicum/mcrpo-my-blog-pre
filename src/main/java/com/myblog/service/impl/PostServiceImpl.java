@@ -77,10 +77,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void deletePost(Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postDao.delete(id)
-        // ВАЖНО: Метод уже помечен @Transactional - это обеспечит атомарность каскадного удаления
-        // Подсказка: посмотрите на метод createPost как пример
+        log.debug("Deleting post with id: {}", id);
         postDao.delete(id);
     }
 
@@ -97,11 +94,6 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public int decrementLikes(Long id) {
-        // TODO: Реализовать уменьшение лайков
-        // 1. Вызвать postDao.decrementLikes(id)
-        // 2. Получить обновлённый пост через postDao.findById(id)
-        // 3. Вернуть новое значение likesCount
-
         log.debug("Decrement likes for post with id: {}", id);
         postDao.decrementLikes(id);
         Optional<Post> post = postDao.findById(id);

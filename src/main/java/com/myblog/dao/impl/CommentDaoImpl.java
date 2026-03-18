@@ -64,10 +64,6 @@ public class CommentDaoImpl implements CommentDao {
 
     @Override
     public Comment update(Comment comment) {
-        // TODO: Реализовать обновление комментария
-        // 1. Выполнить SQL UPDATE: UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?
-        // 2. Вернуть обновлённый комментарий через findById(comment.getId())
-        // Пример: String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
         long id = comment.getId();
 
         String sql = "UPDATE comments SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
@@ -82,8 +78,6 @@ public class CommentDaoImpl implements CommentDao {
 
     @Override
     public void delete(Long id) {
-        // TODO: Реализовать удаление комментария
-        // Выполнить SQL DELETE: DELETE FROM comments WHERE id = ?
         String sql = "DELETE FROM comments WHERE id = ?";
         jdbcTemplate.update(sql,id);
     }

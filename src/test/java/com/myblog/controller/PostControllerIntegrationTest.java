@@ -1,55 +1,33 @@
 package com.myblog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myblog.config.DatabaseConfig;
-import com.myblog.config.RootConfig;
-import com.myblog.config.WebConfig;
 import com.myblog.dto.CreatePostRequest;
 import com.myblog.dto.UpdatePostRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.util.Arrays;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {RootConfig.class, WebConfig.class, DatabaseConfig.class})
-@WebAppConfiguration
-@Transactional
+@SpringBootTest
+@AutoConfigureMockMvc
 class PostControllerIntegrationTest {
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     private MockMvc mockMvc;
+
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
         objectMapper = new ObjectMapper();
-        
-        jdbcTemplate.execute("DELETE FROM post_images");
-        jdbcTemplate.execute("DELETE FROM post_tags");
-        jdbcTemplate.execute("DELETE FROM comments");
-        jdbcTemplate.execute("DELETE FROM tags");
-        jdbcTemplate.execute("DELETE FROM posts");
     }
 
     @Test

@@ -1,196 +1,149 @@
 package com.myblog.service;
 
-import com.myblog.dao.PostDao;
 import com.myblog.dto.CreatePostRequest;
 import com.myblog.dto.PostListResponse;
 import com.myblog.dto.UpdatePostRequest;
 import com.myblog.model.Post;
-import com.myblog.service.impl.PostServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@Transactional
 class PostServiceTest {
 
-    @Mock
-    private PostDao postDao;
-
-    @InjectMocks
-    private PostServiceImpl postService;
-
-    private Post testPost;
-
-    @BeforeEach
-    void setUp() {
-        testPost = new Post();
-        testPost.setId(1L);
-        testPost.setTitle("Test Post");
-        testPost.setText("Test content");
-        testPost.setTags(Arrays.asList("tag1", "tag2"));
-        testPost.setLikesCount(0);
-        testPost.setCommentsCount(0);
-    }
+    @Autowired
+    private PostService postService;
 
     @Test
     void testGetPosts() {
-        // Given
-        List<Post> posts = Arrays.asList(testPost);
-        when(postDao.findAll(anyString(), anyInt(), anyInt())).thenReturn(posts);
-        when(postDao.getTotalCount(anyString())).thenReturn(1);
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Test Post");
+        request.setText("Test content");
+        request.setTags(Arrays.asList("tag1", "tag2"));
 
-        // When
+        postService.createPost(request);
+
         PostListResponse response = postService.getPosts("", 1, 10);
 
-        // Then
         assertNotNull(response);
-        assertEquals(1, response.getPosts().size());
-        assertEquals(testPost.getId(), response.getPosts().get(0).getId());
-        assertFalse(response.isHasPrev());
-        assertFalse(response.isHasNext());
-        assertEquals(1, response.getLastPage());
-        
-        verify(postDao).findAll("", 1, 10);
-        verify(postDao).getTotalCount("");
+        assertNotNull(response.getPosts());
+        assertTrue(response.getPosts().size() >= 1);
+        assertTrue(response.getLastPage() >= 0);
     }
 
     @Test
     void testGetPostById() {
-        // Given
-        when(postDao.findById(1L)).thenReturn(Optional.of(testPost));
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Test Post");
+        request.setText("Test content");
+        request.setTags(Arrays.asList("tag1", "tag2"));
 
-        // When
-        Optional<Post> result = postService.getPostById(1L);
+        Post created = postService.createPost(request);
 
-        // Then
+        Optional<Post> result = postService.getPostById(created.getId());
+
         assertTrue(result.isPresent());
-        assertEquals(testPost.getId(), result.get().getId());
-        assertEquals(testPost.getTitle(), result.get().getTitle());
-        
-        verify(postDao).findById(1L);
+        assertEquals(created.getId(), result.get().getId());
+        assertEquals("Test Post", result.get().getTitle());
     }
 
     @Test
     void testCreatePost() {
-        // Given
         CreatePostRequest request = new CreatePostRequest();
         request.setTitle("New Post");
         request.setText("New content");
         request.setTags(Arrays.asList("tag1"));
-        
-        when(postDao.create(any(Post.class))).thenReturn(testPost);
 
-        // When
         Post result = postService.createPost(request);
 
-        // Then
         assertNotNull(result);
-        assertEquals(testPost.getId(), result.getId());
-        
-        verify(postDao).create(any(Post.class));
+        assertNotNull(result.getId());
+        assertEquals("New Post", result.getTitle());
     }
 
     @Test
     void testUpdatePost() {
-        // Given
         UpdatePostRequest request = new UpdatePostRequest();
-        request.setId(1L);
+        CreatePostRequest createRequest = new CreatePostRequest();
+        createRequest.setTitle("Old title");
+        createRequest.setText("Old text");
+        createRequest.setTags(Arrays.asList("tag1"));
+
+        Post created = postService.createPost(createRequest);
+
         request.setTitle("Updated Post");
         request.setText("Updated content");
         request.setTags(Arrays.asList("tag1"));
-        
-        when(postDao.findById(1L)).thenReturn(Optional.of(testPost));
-        when(postDao.update(any(Post.class))).thenReturn(testPost);
 
-        // When
-        Post result = postService.updatePost(1L, request);
+        Post result = postService.updatePost(created.getId(), request);
 
-        // Then
         assertNotNull(result);
-        
-        verify(postDao).findById(1L);
-        verify(postDao).update(any(Post.class));
+        assertEquals(created.getId(), result.getId());
+        assertEquals("Updated Post", result.getTitle());
     }
 
     @Test
     void testUpdatePostNotFound() {
-        // Given
         UpdatePostRequest request = new UpdatePostRequest();
-        request.setId(999L);
         request.setTitle("Updated Post");
         request.setText("Updated content");
         request.setTags(Arrays.asList("tag1"));
-        
-        when(postDao.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
             postService.updatePost(999L, request);
         });
-        
-        verify(postDao).findById(999L);
-        verify(postDao, never()).update(any(Post.class));
     }
 
     @Test
     void testDeletePost() {
-        // When
-        postService.deletePost(1L);
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Delete Post");
+        request.setText("Delete content");
+        request.setTags(Arrays.asList("tag1"));
 
-        // Then
-        verify(postDao).delete(1L);
+        Post created = postService.createPost(request);
+        postService.deletePost(created.getId());
+
+        Optional<Post> deleted = postService.getPostById(created.getId());
+        assertTrue(deleted.isEmpty());
     }
 
     @Test
     void testIncrementLikes() {
-        // Given
-        Post likedPost = new Post();
-        likedPost.setId(1L);
-        likedPost.setTitle("Test Post");
-        likedPost.setText("Test content");
-        likedPost.setLikesCount(5);
-        likedPost.setCommentsCount(0);
-        
-        when(postDao.findById(1L)).thenReturn(Optional.of(likedPost));
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Like Post");
+        request.setText("Like content");
+        request.setTags(Arrays.asList("tag1"));
 
-        // When
-        int likesCount = postService.incrementLikes(1L);
+        Post created = postService.createPost(request);
 
-        // Then
-        assertEquals(5, likesCount);
-        
-        verify(postDao).incrementLikes(1L);
-        verify(postDao).findById(1L);
+        int likesCount = postService.incrementLikes(created.getId());
+        assertEquals(1, likesCount);
     }
 
     @Test
     void testDecrementLikes() {
-        Post likedPost = new Post();
-        likedPost.setId(1L);
-        likedPost.setTitle("Test Post");
-        likedPost.setText("Test content");
-        likedPost.setLikesCount(3);
-        likedPost.setCommentsCount(0);
-        
-        when(postDao.findById(1L)).thenReturn(Optional.of(likedPost));
+        CreatePostRequest request = new CreatePostRequest();
+        request.setTitle("Like Post");
+        request.setText("Like content");
+        request.setTags(Arrays.asList("tag1"));
 
-        int likesCount = postService.decrementLikes(1L);
+        Post created = postService.createPost(request);
+        postService.incrementLikes(created.getId());
+        postService.incrementLikes(created.getId());
+        postService.incrementLikes(created.getId());
 
-        assertEquals(3, likesCount);
-        
-        verify(postDao).decrementLikes(1L);
-        verify(postDao).findById(1L);
+        int likesCount = postService.decrementLikes(created.getId());
+
+        assertEquals(2, likesCount);
     }
 }
 
