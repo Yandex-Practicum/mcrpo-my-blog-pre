@@ -1,50 +1,43 @@
 package com.myblog.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.myblog.config.DatabaseConfig;
-import com.myblog.config.RootConfig;
-import com.myblog.config.WebConfig;
+import com.myblog.MyBlogApplication;
 import com.myblog.dto.CreatePostRequest;
 import com.myblog.dto.UpdatePostRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.context.WebApplicationContext;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {RootConfig.class, WebConfig.class, DatabaseConfig.class})
-@WebAppConfiguration
+@SpringBootTest(classes = MyBlogApplication.class)
+@AutoConfigureMockMvc
 @Transactional
 class PostControllerIntegrationTest {
 
     @Autowired
-    private WebApplicationContext webApplicationContext;
+    private MockMvc mockMvc;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private MockMvc mockMvc;
+    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
-        objectMapper = new ObjectMapper();
-        
         jdbcTemplate.execute("DELETE FROM post_images");
         jdbcTemplate.execute("DELETE FROM post_tags");
         jdbcTemplate.execute("DELETE FROM comments");
@@ -85,7 +78,6 @@ class PostControllerIntegrationTest {
 
     @Test
     void testGetPostById() throws Exception {
-        // Create a post first
         CreatePostRequest request = new CreatePostRequest();
         request.setTitle("Test Post");
         request.setText("Test content");
@@ -99,7 +91,6 @@ class PostControllerIntegrationTest {
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
-        // Get the post
         mockMvc.perform(get("/api/posts/" + postId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(postId))
@@ -108,7 +99,6 @@ class PostControllerIntegrationTest {
 
     @Test
     void testUpdatePost() throws Exception {
-        // Create a post first
         CreatePostRequest createRequest = new CreatePostRequest();
         createRequest.setTitle("Original Title");
         createRequest.setText("Original content");
@@ -122,7 +112,6 @@ class PostControllerIntegrationTest {
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
-        // Update the post
         UpdatePostRequest updateRequest = new UpdatePostRequest();
         updateRequest.setId(postId);
         updateRequest.setTitle("Updated Title");
@@ -139,7 +128,6 @@ class PostControllerIntegrationTest {
 
     @Test
     void testDeletePost() throws Exception {
-        // Create a post first
         CreatePostRequest request = new CreatePostRequest();
         request.setTitle("Post to Delete");
         request.setText("Content");
@@ -153,18 +141,15 @@ class PostControllerIntegrationTest {
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
-        // Delete the post
         mockMvc.perform(delete("/api/posts/" + postId))
             .andExpect(status().isOk());
 
-        // Verify it's deleted
         mockMvc.perform(get("/api/posts/" + postId))
             .andExpect(status().isNotFound());
     }
 
     @Test
     void testIncrementLikes() throws Exception {
-        // Create a post first
         CreatePostRequest request = new CreatePostRequest();
         request.setTitle("Post with Likes");
         request.setText("Content");
@@ -178,15 +163,12 @@ class PostControllerIntegrationTest {
 
         Long postId = objectMapper.readTree(response).get("id").asLong();
 
-        // Increment likes
         mockMvc.perform(post("/api/posts/" + postId + "/likes"))
             .andExpect(status().isOk())
             .andExpect(content().string("1"));
 
-        // Increment again
         mockMvc.perform(post("/api/posts/" + postId + "/likes"))
             .andExpect(status().isOk())
             .andExpect(content().string("2"));
     }
 }
-
