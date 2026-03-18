@@ -1,142 +1,144 @@
 package com.myblog.service;
 
-import com.myblog.dao.CommentDao;
 import com.myblog.dto.CreateCommentRequest;
+import com.myblog.dto.CreatePostRequest;
 import com.myblog.dto.UpdateCommentRequest;
 import com.myblog.model.Comment;
-import com.myblog.service.impl.CommentServiceImpl;
-import org.junit.jupiter.api.BeforeEach;
+import com.myblog.model.Post;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-@ExtendWith(MockitoExtension.class)
+ 
+@SpringBootTest
+@Transactional
 class CommentServiceTest {
 
-    @Mock
-    private CommentDao commentDao;
+    @Autowired
+    private CommentService commentService;
 
-    @InjectMocks
-    private CommentServiceImpl commentService;
-
-    private Comment testComment;
-
-    @BeforeEach
-    void setUp() {
-        testComment = new Comment();
-        testComment.setId(1L);
-        testComment.setText("Test comment");
-        testComment.setPostId(1L);
-    }
+    @Autowired
+    private PostService postService;
 
     @Test
     void testGetCommentsByPostId() {
-        // Given
-        List<Comment> comments = Arrays.asList(testComment);
-        when(commentDao.findByPostId(1L)).thenReturn(comments);
+        CreatePostRequest postRequest = new CreatePostRequest();
+        postRequest.setTitle("Post for comments");
+        postRequest.setText("Body");
+        postRequest.setTags(Arrays.asList("t1"));
 
-        // When
-        List<Comment> result = commentService.getCommentsByPostId(1L);
+        Post post = postService.createPost(postRequest);
 
-        // Then
+        CreateCommentRequest request = new CreateCommentRequest();
+        request.setText("Test comment");
+        request.setPostId(post.getId());
+        commentService.createComment(request);
+
+        List<Comment> result = commentService.getCommentsByPostId(post.getId());
+
         assertNotNull(result);
-        assertEquals(1, result.size());
-        assertEquals(testComment.getId(), result.get(0).getId());
-        
-        verify(commentDao).findByPostId(1L);
+        assertTrue(result.size() >= 1);
     }
 
     @Test
     void testGetCommentById() {
-        // Given
-        when(commentDao.findById(1L)).thenReturn(Optional.of(testComment));
+        CreatePostRequest postRequest = new CreatePostRequest();
+        postRequest.setTitle("Post for comment");
+        postRequest.setText("Body");
+        postRequest.setTags(Arrays.asList("t1"));
 
-        // When
-        Optional<Comment> result = commentService.getCommentById(1L);
+        Post post = postService.createPost(postRequest);
 
-        // Then
+        CreateCommentRequest request = new CreateCommentRequest();
+        request.setText("Test comment");
+        request.setPostId(post.getId());
+
+        Comment created = commentService.createComment(request);
+
+        Optional<Comment> result = commentService.getCommentById(created.getId());
+
         assertTrue(result.isPresent());
-        assertEquals(testComment.getId(), result.get().getId());
-        
-        verify(commentDao).findById(1L);
+        assertEquals(created.getId(), result.get().getId());
     }
 
     @Test
     void testCreateComment() {
-        // Given
         CreateCommentRequest request = new CreateCommentRequest();
         request.setText("New comment");
-        request.setPostId(1L);
         
-        when(commentDao.create(any(Comment.class))).thenReturn(testComment);
+        CreatePostRequest postRequest = new CreatePostRequest();
+        postRequest.setTitle("Post for create comment");
+        postRequest.setText("Body");
+        postRequest.setTags(Arrays.asList("t1"));
 
-        // When
+        Post post = postService.createPost(postRequest);
+        request.setPostId(post.getId());
+
         Comment result = commentService.createComment(request);
 
-        // Then
         assertNotNull(result);
-        assertEquals(testComment.getId(), result.getId());
-        
-        verify(commentDao).create(any(Comment.class));
+        assertNotNull(result.getId());
+        assertEquals(post.getId(), result.getPostId());
     }
 
     @Test
     void testUpdateComment() {
-        // Given
+        CreatePostRequest postRequest = new CreatePostRequest();
+        postRequest.setTitle("Post for update comment");
+        postRequest.setText("Body");
+        postRequest.setTags(Arrays.asList("t1"));
+
+        Post post = postService.createPost(postRequest);
+
+        CreateCommentRequest createRequest = new CreateCommentRequest();
+        createRequest.setText("Old text");
+        createRequest.setPostId(post.getId());
+        Comment created = commentService.createComment(createRequest);
+
         UpdateCommentRequest request = new UpdateCommentRequest();
-        request.setId(1L);
         request.setText("Updated comment");
-        request.setPostId(1L);
-        
-        when(commentDao.findById(1L)).thenReturn(Optional.of(testComment));
-        when(commentDao.update(any(Comment.class))).thenReturn(testComment);
 
-        // When
-        Comment result = commentService.updateComment(1L, request);
+        Comment result = commentService.updateComment(created.getId(), request);
 
-        // Then
         assertNotNull(result);
-        
-        verify(commentDao).findById(1L);
-        verify(commentDao).update(any(Comment.class));
+        assertEquals(created.getId(), result.getId());
+        assertEquals("Updated comment", result.getText());
     }
 
     @Test
     void testUpdateCommentNotFound() {
-        // Given
         UpdateCommentRequest request = new UpdateCommentRequest();
-        request.setId(999L);
         request.setText("Updated comment");
-        request.setPostId(1L);
-        
-        when(commentDao.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
         assertThrows(IllegalArgumentException.class, () -> {
             commentService.updateComment(999L, request);
         });
-        
-        verify(commentDao).findById(999L);
-        verify(commentDao, never()).update(any(Comment.class));
     }
 
     @Test
     void testDeleteComment() {
-        // When
-        commentService.deleteComment(1L);
+        CreatePostRequest postRequest = new CreatePostRequest();
+        postRequest.setTitle("Post for delete comment");
+        postRequest.setText("Body");
+        postRequest.setTags(Arrays.asList("t1"));
 
-        // Then
-        verify(commentDao).delete(1L);
+        Post post = postService.createPost(postRequest);
+
+        CreateCommentRequest createRequest = new CreateCommentRequest();
+        createRequest.setText("To delete");
+        createRequest.setPostId(post.getId());
+        Comment created = commentService.createComment(createRequest);
+
+        commentService.deleteComment(created.getId());
+
+        Optional<Comment> deleted = commentService.getCommentById(created.getId());
+        assertTrue(deleted.isEmpty());
     }
 }
 

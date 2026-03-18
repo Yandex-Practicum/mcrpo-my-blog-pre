@@ -1,16 +1,11 @@
 package com.myblog.dao;
 
-import com.myblog.config.DatabaseConfig;
-import com.myblog.dao.impl.PostDaoImpl;
-import com.myblog.dao.impl.TagDaoImpl;
 import com.myblog.model.Post;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
@@ -19,8 +14,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {DatabaseConfig.class, PostDaoImpl.class, TagDaoImpl.class})
+@SpringBootTest
 @Transactional
 class PostDaoIntegrationTest {
 
@@ -212,6 +206,40 @@ class PostDaoIntegrationTest {
 
         // Then
         assertEquals(3, count);
+    }
+
+    @Test
+    void testDecrementLikes() {
+
+        Post post = new Post();
+        post.setTitle("Test");
+        post.setText("Content");
+        post.setTags(Arrays.asList());
+        Post createdPost = postDao.create(post);
+
+        postDao.incrementLikes(createdPost.getId());
+        postDao.incrementLikes(createdPost.getId());
+
+        postDao.decrementLikes(createdPost.getId());
+
+        Optional<Post> updatedPost = postDao.findById(createdPost.getId());
+        assertTrue(updatedPost.isPresent());
+        assertEquals(1, updatedPost.get().getLikesCount());
+    }
+
+    @Test
+    void testDelete() {
+
+        Post post = new Post();
+        post.setTitle("Test");
+        post.setText("Content");
+        post.setTags(Arrays.asList());
+        Post createdPost = postDao.create(post);
+
+        postDao.delete(createdPost.getId());
+
+        Optional<Post> deletedPost = postDao.findById(createdPost.getId());
+        assertFalse(deletedPost.isPresent());
     }
 }
 
