@@ -54,9 +54,7 @@ mvn clean package
 # Запустить тесты
 mvn test
 
-# Развернуть на Tomcat
-cp target/*.war $CATALINA_HOME/webapps/ROOT.war
-catalina run
+
 ```
 
 ---

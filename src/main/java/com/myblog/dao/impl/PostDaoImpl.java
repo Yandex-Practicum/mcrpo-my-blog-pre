@@ -145,11 +145,18 @@ public class PostDaoImpl implements PostDao {
         // TODO: Реализовать каскадное удаление поста
         // Порядок удаления:
         // 1. Удалить все комментарии: DELETE FROM comments WHERE post_id = ?
+        jdbcTemplate.update("DELETE FROM comments WHERE post_id = ?", id);
         // 2. Удалить все связи с тегами: DELETE FROM post_tags WHERE post_id = ?
+        jdbcTemplate.update("DELETE FROM post_tags WHERE post_id = ?", id);
         // 3. Удалить изображение: DELETE FROM post_images WHERE post_id = ?
+        jdbcTemplate.update("DELETE FROM post_images WHERE post_id = ?", id);
         // 4. Удалить сам пост: DELETE FROM posts WHERE id = ?
+        int deleted = jdbcTemplate.update("DELETE FROM posts WHERE id = ?", id);
+        if (deleted == 0) {
+            throw new IllegalArgumentException("Post not found with id: " + id);
+        }
         // ВАЖНО: Используйте @Transactional в сервисе для атомарности операции!
-        throw new UnsupportedOperationException("TODO: Implement cascade delete");
+
     }
 
     @Override
@@ -162,8 +169,13 @@ public class PostDaoImpl implements PostDao {
     public void decrementLikes(Long id) {
         // TODO: Реализовать уменьшение счётчика лайков на 1
         // Используйте GREATEST(likes_count - 1, 0) чтобы не уйти в минус
+        String sql = "UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?";
+        int updated = jdbcTemplate.update(sql, id);
+        if (updated == 0) {
+            throw new IllegalArgumentException("Post not found with id: " + id);
+        }
         // Пример SQL: UPDATE posts SET likes_count = GREATEST(likes_count - 1, 0) WHERE id = ?
-        throw new UnsupportedOperationException("TODO: Implement decrementLikes");
+
     }
 
     @Override

@@ -54,11 +54,18 @@ public class CommentServiceImpl implements CommentService {
     public Comment updateComment(Long commentId, UpdateCommentRequest request) {
         // TODO: Реализовать обновление комментария
         // 1. Проверить существование комментария через commentDao.findById(commentId)
+        Optional<Comment> existing = commentDao.findById(commentId);
         // 2. Если комментарий не найден - выбросить IllegalArgumentException
+        if (existing.isEmpty()) {
+            throw new IllegalArgumentException("Comment not found with id: " + commentId);
+        }
         // 3. Обновить текст комментария: comment.setText(request.getText())
+        Comment comment = existing.get();
+        comment.setText(request.getText());
         // 4. Вызвать commentDao.update(comment)
+        return commentDao.update(comment);
         // 5. Вернуть обновлённый комментарий
-        throw new UnsupportedOperationException("TODO: Implement updateComment");
+
     }
 
     @Override
@@ -66,8 +73,9 @@ public class CommentServiceImpl implements CommentService {
     public void deleteComment(Long commentId) {
         // TODO: Реализовать удаление комментария
         // 1. Вызвать commentDao.delete(commentId)
+        commentDao.delete(commentId);
         // Подсказка: посмотрите на метод createComment как пример
-        throw new UnsupportedOperationException("TODO: Implement deleteComment");
+
     }
 }
 
