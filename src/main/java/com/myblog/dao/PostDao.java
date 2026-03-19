@@ -4,6 +4,12 @@ import com.myblog.model.Post;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
+
+@Repository  
+public class PostDaoImpl implements PostDao {
+    // Реализация методов  
+}
 
 public interface PostDao {
     Post create(Post post);

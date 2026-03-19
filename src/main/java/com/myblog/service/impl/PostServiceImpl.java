@@ -77,11 +77,14 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void deletePost(Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postDao.delete(id)
-        // ВАЖНО: Метод уже помечен @Transactional - это обеспечит атомарность каскадного удаления
-        // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+        // Проверяем, существует ли пост (опционально, но хорошая практика)
+        Post post = postDao.findById(id);
+        if (post == null) {
+            throw new NotFoundException("Post not found with id: " + id);
+        }
+
+        // Вызываем метод DAO для каскадного удаления поста
+        postDao.delete(id);
     }
 
     @Override
@@ -97,11 +100,20 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public int decrementLikes(Long id) {
-        // TODO: Реализовать уменьшение лайков
-        // 1. Вызвать postDao.decrementLikes(id)
-        // 2. Получить обновлённый пост через postDao.findById(id)
-        // 3. Вернуть новое значение likesCount
-        throw new UnsupportedOperationException("TODO: Implement decrementLikes");
+        // 1. Проверяем, существует ли пост
+        Post post = postDao.findById(id);
+        if (post == null) {
+            throw new NotFoundException("Post not found with id: " + id);
+        }
+
+        // 2. Уменьшаем количество лайков в базе данных
+        postDao.decrementLikes(id);
+
+        // 3. Получаем обновлённый пост с новым количеством лайков
+        Post updatedPost = postDao.findById(id);
+
+        // 4. Возвращаем новое количество лайков
+        return updatedPost.getLikesCount();
     }
 
     @Override

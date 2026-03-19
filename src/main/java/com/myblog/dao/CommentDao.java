@@ -4,6 +4,12 @@ import com.myblog.model.Comment;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Repository;
+
+@Repository  
+public class CommentDaoImpl implements CommentDao {
+    // Реализация методов  
+}
 
 public interface CommentDao {
     Comment create(Comment comment);

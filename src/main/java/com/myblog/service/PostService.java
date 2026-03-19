@@ -19,4 +19,3 @@ public interface PostService {
     Optional<byte[]> getImage(Long postId);
     Optional<String> getImageContentType(Long postId);
 }
-
