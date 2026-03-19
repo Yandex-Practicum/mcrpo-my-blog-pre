@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 public class PostController {
 
     private static final Logger log = LoggerFactory.getLogger(PostController.class);
@@ -78,11 +78,8 @@ public class PostController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
-        // TODO: Реализовать удаление поста
-        // 1. Вызвать postService.deletePost(id)
-        // 2. Вернуть ResponseEntity.ok().build()
-        // Подсказка: посмотрите на метод createPost как пример
-        throw new UnsupportedOperationException("TODO: Implement deletePost");
+        postService.deletePost(id);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/{id}/likes")
@@ -94,10 +91,8 @@ public class PostController {
 
     @DeleteMapping("/{id}/likes")
     public ResponseEntity<Integer> removeLike(@PathVariable Long id) {
-        // TODO: Реализовать удаление лайка
-        // 1. Вызвать postService.decrementLikes(id)
-        // 2. Вернуть ResponseEntity.ok() с новым количеством лайков
-        throw new UnsupportedOperationException("TODO: Implement removeLike");
+        int likesCount = postService.decrementLikes(id);
+        return ResponseEntity.ok(likesCount);
     }
 
     @PutMapping("/{id}/image")
