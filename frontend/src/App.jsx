@@ -151,6 +151,8 @@ function PostPage() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [editing, setEditing] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingCommentText, setEditingCommentText] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -203,6 +205,59 @@ function PostPage() {
       }
     } catch (error) {
       console.error('Ошибка добавления комментария:', error);
+    }
+  };
+
+  const startEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditingCommentText(comment.text);
+  };
+
+  const cancelEditComment = () => {
+    setEditingCommentId(null);
+    setEditingCommentText('');
+  };
+
+  const handleUpdateComment = async (e) => {
+    e.preventDefault();
+    if (!editingCommentId || !editingCommentText.trim()) return;
+
+    try {
+      const response = await fetch(`${API_URL}/posts/${id}/comments/${editingCommentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: editingCommentId,
+          text: editingCommentText,
+          postId: parseInt(id, 10)
+        })
+      });
+
+      if (response.ok) {
+        cancelEditComment();
+        loadComments();
+      }
+    } catch (error) {
+      console.error('Ошибка обновления комментария:', error);
+      alert('Не удалось обновить комментарий');
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm('Удалить комментарий?')) return;
+
+    try {
+      const response = await fetch(`${API_URL}/posts/${id}/comments/${commentId}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        loadComments();
+        loadPost(); // обновляем счётчик комментариев
+      }
+    } catch (error) {
+      console.error('Ошибка удаления комментария:', error);
+      alert('Не удалось удалить комментарий');
     }
   };
 
@@ -269,10 +324,44 @@ function PostPage() {
               <button type="submit" className="btn btn-primary">Отправить</button>
             </form>
 
+            {editingCommentId && (
+              <form onSubmit={handleUpdateComment} className="comment-form edit-comment-form">
+                <h3>Редактирование комментария</h3>
+                <textarea
+                  value={editingCommentText}
+                  onChange={(e) => setEditingCommentText(e.target.value)}
+                  rows="3"
+                  className="textarea"
+                />
+                <div className="form-actions">
+                  <button type="submit" className="btn btn-primary">Сохранить</button>
+                  <button type="button" onClick={cancelEditComment} className="btn btn-secondary">
+                    Отмена
+                  </button>
+                </div>
+              </form>
+            )}
+
             <div className="comments-list">
               {comments.map(comment => (
                 <div key={comment.id} className="comment">
                   <p>{comment.text}</p>
+                  <div className="comment-actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-small"
+                      onClick={() => startEditComment(comment)}
+                    >
+                      Редактировать
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-danger btn-small"
+                      onClick={() => handleDeleteComment(comment.id)}
+                    >
+                      Удалить
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
